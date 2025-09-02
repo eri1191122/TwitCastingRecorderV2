@@ -1,0 +1,16 @@
+{
+  "headless": true,
+  "ffmpeg_path": "",
+  "ytdlp_path": "yt-dlp",
+  "keep_alive_interval": 1800,
+  "preferred_quality": "best",
+  "default_duration": 600,
+  "test_duration": 10,
+  "debug_mode": false,
+  "verbose_log": false,
+  "save_network_log": false,
+  "enable_group_gate_auto": false,
+  "auto_heal": true,
+  "m3u8_timeout": 45,
+  "cookie_domain": ".twitcasting.tv"
+}

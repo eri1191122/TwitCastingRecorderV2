@@ -1,0 +1,382 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Chrome Singleton Manager v6.4 Stable
+- 目的：
+  1) ログイン用は必ず可視（ウィザード中のみ）
+  2) 録画用は常にヘッドレス（可視ctxは絶対に再利用しない）
+  3) ctxが無くても Cookie DB を直読して strong/weak/none を返す（副作用ゼロ）
+  4) close() しても last_known_login_status を降格しない（unknown へはしない）
+
+安定化ポイント（v6.4）：
+- SQLite を読み取り専用URI (mode=ro, immutable=1) で開く：ロック中でも“読むだけ”は通す
+- strong → none/weak の降格にヒステリシス（2連続以上で降格）
+- ログイン中は必ず“可視”を強制、ヘッドレス要求は拒否
+- ログイン導線を /account/signin に寄せて成功を前倒し
+- time.sleep() を撤廃し、イベントループをブロックしない（チェック側は非同期のみで待機）
+"""
+
+from __future__ import annotations
+
+import asyncio
+import sqlite3
+import tempfile
+import shutil
+import time
+from dataclasses import dataclass
+from datetime import datetime
+from pathlib import Path
+from typing import Optional
+
+# 遅延import：無い環境でも読み込み時に落とさない
+try:
+    from playwright.async_api import async_playwright, BrowserContext, Page
+except Exception:  # pragma: no cover
+    async_playwright = None
+    BrowserContext = object  # type: ignore
+    Page = object  # type: ignore
+
+# ===== パス =====
+ROOT = (
+    Path(__file__).resolve().parent.parent
+    if (Path(__file__).resolve().parent.name == "core")
+    else Path(__file__).resolve().parent
+)
+AUTH_DIR = ROOT / ".auth" / "playwright"
+LOGS = ROOT / "logs"
+LOGS.mkdir(parents=True, exist_ok=True)
+AUTH_DIR.mkdir(parents=True, exist_ok=True)
+
+# ===== ログ =====
+def _ts() -> str:
+    return datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+def log(msg: str, level: str = "INFO") -> None:
+    try:
+        p = LOGS / "chrome_diagnostic.log"
+        p.parent.mkdir(parents=True, exist_ok=True)
+        with p.open("a", encoding="utf-8") as f:
+            f.write(f"{_ts()} [{level}] {msg}\n")
+    except Exception:
+        # ここで例外を投げない（静穏）
+        pass
+
+log("Chrome Singleton Manager v6.4 loaded")
+
+# ===== メタ =====
+@dataclass
+class _CtxMeta:
+    headless: bool
+    created_at: float
+
+
+class ChromeSingleton:
+    """Playwright Chromium の単一管理"""
+
+    _instance: Optional["ChromeSingleton"] = None
+
+    # --- 取得 ---
+    @classmethod
+    def instance(cls) -> "ChromeSingleton":
+        if cls._instance is None:
+            cls._instance = cls()
+        return cls._instance
+
+    # --- 初期化 ---
+    def __init__(self) -> None:
+        self._pw = None
+        self._browser_ctx: Optional[BrowserContext] = None
+        self._page: Optional[Page] = None
+        self._ctx_meta: Optional[_CtxMeta] = None
+
+        self._login_in_progress: bool = False
+        self._last_known_login_status: str = "unknown"
+        self._degrade_consecutive: int = 0  # strongからの降格疑いの連続回数
+
+        self._lock = asyncio.Lock()
+
+    # ===== 内部：Playwright準備 =====
+    async def _ensure_pw(self) -> None:
+        if self._pw is None:
+            if async_playwright is None:
+                raise RuntimeError("playwright is not installed")
+            self._pw = await async_playwright().start()
+            log("Playwright initialized")
+
+    async def _launch_new_ctx(self, *, headless: bool) -> BrowserContext:
+        """永続プロファイルを用いた新規コンテキスト起動"""
+        await self._ensure_pw()
+        chromium = self._pw.chromium
+
+        args = [
+            "--disable-sync",
+            "--disable-background-networking",
+            "--no-default-browser-check",
+            "--no-first-run",
+            "--disable-plugins",
+            "--disable-extensions",
+        ]
+
+        log(f"Launching persistent context (headless={headless})")
+        ctx = await chromium.launch_persistent_context(
+            user_data_dir=str(AUTH_DIR),
+            headless=headless,
+            args=args,
+            viewport={"width": 1200, "height": 850},
+            accept_downloads=False,
+        )
+        page = ctx.pages[0] if ctx.pages else await ctx.new_page()
+        self._browser_ctx = ctx
+        self._page = page
+        self._ctx_meta = _CtxMeta(headless=headless, created_at=time.time())
+        log(f"Context launched (headless={headless})")
+        return ctx
+
+    async def _hard_close_ctx(self, *, reason: str) -> None:
+        """現在のコンテキストを完全に閉じる（last_known は降格しない）"""
+        if self._browser_ctx:
+            try:
+                await self._browser_ctx.close()
+                log(f"Context closed ({reason})")
+            except Exception as e:
+                log(f"Context close error: {e}", "WARN")
+        self._browser_ctx = None
+        self._page = None
+        self._ctx_meta = None
+
+    async def _ensure_context(self, *, headless: bool) -> BrowserContext:
+        """
+        コンテキストのモード整合性を保証する。
+        - 既存があり、モード一致なら再利用
+        - モード不一致：
+            * ログイン中：可視を強制（ヘッドレス要求は拒否）
+            * 通常時：要求モードで作り直し
+        """
+        # 既存あり
+        if self._browser_ctx and self._ctx_meta:
+            current_headless = self._ctx_meta.headless
+
+            # 一致なら再利用
+            if current_headless == headless:
+                return self._browser_ctx
+
+            # ログイン中のポリシー
+            if self._login_in_progress:
+                if headless:
+                    # ログイン中のヘッドレス要求は拒否（可視を維持）
+                    log("Headless requested during login -> denied", "WARN")
+                    if current_headless:
+                        # 現在がヘッドレスなら、可視で作り直す
+                        log("Force visible for login (recreate)", "INFO")
+                        await self._hard_close_ctx(reason="force_visible_for_login")
+                        return await self._launch_new_ctx(headless=False)
+                    # すでに可視ならそのまま
+                    return self._browser_ctx
+                else:
+                    # 可視要求：現在がヘッドレスなら作り直し
+                    if current_headless:
+                        log("Login needs visible -> recreating", "INFO")
+                        await self._hard_close_ctx(reason="login_needs_visible")
+                        return await self._launch_new_ctx(headless=False)
+                    return self._browser_ctx
+
+            # 通常時のモード不一致は作り直し
+            mode_name = "headless" if headless else "visible"
+            log(f"Mode mismatch -> recreating as {mode_name}")
+            await self._hard_close_ctx(reason=f"mode_mismatch_to_{mode_name}")
+            return await self._launch_new_ctx(headless=headless)
+
+        # 無い → 新規
+        return await self._launch_new_ctx(headless=headless)
+
+    # ===== 公開API =====
+    async def initialize(self) -> None:
+        """将来拡張用のダミー（現状はログのみ）"""
+        log("initialize (no-op)")
+
+    async def ensure_headless(self) -> BrowserContext:
+        async with self._lock:
+            return await self._ensure_context(headless=True)
+
+    async def ensure_visible(self) -> BrowserContext:
+        async with self._lock:
+            return await self._ensure_context(headless=False)
+
+    async def guided_login_wizard(self, url: Optional[str] = None, timeout_sec: int = 600) -> bool:
+        """
+        ログインウィザード：
+        - 先頭で _login_in_progress = True を立てて、必ず可視で起動
+        - strong 検知後はクッキー書き戻し猶予を取り、ヘッドレスへ退避
+        """
+        async with self._lock:
+            if self._login_in_progress:
+                log("Login wizard already running; debounce", "WARN")
+                return False
+            self._login_in_progress = True
+            log("Login wizard started (flag=True)")
+
+        try:
+            # 可視を強制
+            ctx = await self.ensure_visible()
+            page = self._page or await ctx.new_page()
+            self._page = page
+
+            # ログイン入口へ（サインイン画面を明示）
+            target = url or "https://twitcasting.tv/account/signin"
+            await page.goto(target, wait_until="domcontentloaded")
+            log(f"Login page opened: {target}")
+
+            start = time.time()
+            while time.time() - start < timeout_sec:
+                status = await self.check_login_status()
+                if status == "strong":
+                    log("Login successful (strong detected)")
+                    # 即座に strong を確定（降格防止）
+                    self._last_known_login_status = "strong"
+                    # DBフラッシュ猶予（非同期）
+                    await asyncio.sleep(0.2)
+
+                    # 可視を閉じ、ヘッドレスで待機
+                    await self._hard_close_ctx(reason="post_login_switch")
+                    await self.ensure_headless()
+                    log("Switched to headless after login")
+                    return True
+
+                # 1秒周期で再確認（非同期）
+                await asyncio.sleep(1.0)
+
+            log("Login timeout", "WARN")
+            return False
+
+        finally:
+            async with self._lock:
+                self._login_in_progress = False
+                log("Login wizard ended (flag=False)")
+
+    async def check_login_status(self) -> str:
+        """
+        ログイン状態確認（副作用ゼロ）
+        - ctx が無くても Cookie DB 直読で判定
+        - 失敗時は降格せず、最後の値を返す
+        - strong からの降格は 2 連続で成立した場合のみ反映（ヒステリシス）
+        """
+        status = self._probe_login_status_from_profile()
+
+        if status:
+            # strong から none/weak へはヒステリシス（二段閾値）
+            if self._last_known_login_status == "strong" and status in ("weak", "none"):
+                self._degrade_consecutive += 1
+                log(f"Degrade attempt (strong->{status}) #{self._degrade_consecutive}", "WARN")
+                if self._degrade_consecutive < 2:
+                    # 単発の読み取り誤差は無視（据え置き）
+                    return self._last_known_login_status
+                # 2連続で来たら初めて降格
+                self._last_known_login_status = status
+                log(f"Degrade committed: strong -> {status}", "WARN")
+            else:
+                # strong を再確認できた / もしくは unknown/weak からの上昇等
+                self._last_known_login_status = status
+                self._degrade_consecutive = 0
+
+            log(f"Login status: {self._last_known_login_status}")
+            return self._last_known_login_status
+
+        # 読み取り不能（ロック/権限等）→ 降格せず最後の値を返す
+        log(f"Profile probe failed; keep last-known: {self._last_known_login_status}", "WARN")
+        return self._last_known_login_status
+
+    # ===== 内部：Cookie判定 =====
+    def _probe_login_status_from_profile(self) -> Optional[str]:
+        """
+        .auth/playwright/Default/Network/Cookies を読み取り専用URIで直読し、Cookie名で判定。
+          - strong: '_twitcasting_session' が存在
+          - weak  : tc_ss/tc_s/tc_id/tc_u のいずれかが存在
+          - none  : TwitCasting関連Cookie無し
+        読み取り不能時は None（呼び出し側で降格禁止ロジック）
+        """
+        cookies_db = AUTH_DIR / "Default" / "Network" / "Cookies"
+        if not cookies_db.exists():
+            log("Cookies DB not found", "WARN")
+            return None
+
+        # 1) 読み取り専用URI（本命・ロック中でも高確率で読める）
+        try:
+            uri = f"file:{cookies_db}?mode=ro&immutable=1"
+            con = sqlite3.connect(uri, uri=True, timeout=0.05)
+            try:
+                return self._query_cookies(con)
+            finally:
+                con.close()
+        except Exception as e:
+            log(f"Direct URI read failed: {e}", "WARN")
+
+        # 2) 通常コピー（失敗しても降格しないので控えめに）
+        try:
+            with tempfile.TemporaryDirectory() as td:
+                tmp = Path(td) / "Cookies.db"
+                shutil.copy2(cookies_db, tmp)
+                con = sqlite3.connect(str(tmp))
+                try:
+                    return self._query_cookies(con)
+                finally:
+                    con.close()
+        except Exception as e:
+            log(f"Copy read failed: {e}", "WARN")
+
+        # 3) それでも無理なら None
+        return None
+
+    def _query_cookies(self, con: sqlite3.Connection) -> Optional[str]:
+        """Cookieテーブルから TwitCasting 用のエントリを抽出し状態にマップ"""
+        cur = con.cursor()
+        cur.execute(
+            """
+            SELECT name
+            FROM cookies
+            WHERE host_key LIKE '%.twitcasting.tv'
+               OR host_key = 'twitcasting.tv'
+               OR host_key = '.twitcasting.tv'
+            """
+        )
+        names = {row[0] for row in cur.fetchall()}
+
+        if "_twitcasting_session" in names:
+            return "strong"
+        if names.intersection({"tc_ss", "tc_s", "tc_id", "tc_u"}):
+            return "weak"
+        # TwitCasting 由来Cookieが一切ない
+        return "none"
+
+    # ===== 終了 =====
+    async def close(self, keep_chrome: bool = True) -> None:
+        """
+        終了処理。keep_chrome=False の場合はコンテキストを閉じる。
+        ※ last_known_login_status は降格しない
+        """
+        async with self._lock:
+            if not keep_chrome:
+                await self._hard_close_ctx(reason="close()")
+            log("close() called")
+
+    # ===== 付帯 =====
+    def get_unified_ua(self) -> str:
+        """録画系で使う統一UA（シンプル固定）"""
+        return (
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+            "AppleWebKit/537.36 (KHTML, like Gecko) "
+            "Chrome/120.0.0.0 Safari/537.36"
+        )
+
+
+# ===== 後方互換API =====
+def get_chrome_singleton() -> ChromeSingleton:
+    """tc_recorder_core.py が期待する同期API"""
+    return ChromeSingleton.instance()
+
+def get_instance() -> ChromeSingleton:
+    """別名"""
+    return ChromeSingleton.instance()
+
+async def get_singleton() -> ChromeSingleton:
+    """非推奨の非同期エイリアス（互換維持）"""
+    return ChromeSingleton.instance()
