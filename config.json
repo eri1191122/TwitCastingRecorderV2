@@ -1,6 +1,6 @@
 {
   "headless": true,
-  "ffmpeg_path": "",
+  "ffmpeg_path": "C:\\ffmpeg-8.0-essentials_build\\bin\\ffmpeg.exe",
   "ytdlp_path": "yt-dlp",
   "keep_alive_interval": 1800,
   "preferred_quality": "best",
@@ -9,8 +9,15 @@
   "debug_mode": false,
   "verbose_log": false,
   "save_network_log": false,
-  "enable_group_gate_auto": false,
+  "enable_group_gate_auto": true,
   "auto_heal": true,
   "m3u8_timeout": 45,
-  "cookie_domain": ".twitcasting.tv"
+  "cookie_domain": ".twitcasting.tv",
+  "monitor": {
+    "poll_interval": 30,
+    "max_concurrent": 3,
+    "watchdog_interval": 10,
+    "max_idle_time": 300,
+    "url_check_timeout": 300
+  }
 }

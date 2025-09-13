@@ -1,516 +1,632 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Job Queue for TwitCasting Auto Recording (5 Workers Version)
-- 同時実行5本対応
-- 20人監視対応
-- 優先度管理機能付き
+Job Queue for TwitCasting Auto Recording
+Version: 2.0.0 (Ultimate Edition)
+
+高度な優先度付きジョブキュー（拡張可能設計）
+- importパス完全統一
+- エラーハンドリング強化
+- リファクタリング実施
 """
 import asyncio
 import json
-import sys
 import time
-from dataclasses import dataclass, asdict, field
-from datetime import datetime
-from enum import Enum
-from pathlib import Path
-from typing import Dict, List, Optional, Any, Set
 import heapq
+import logging
+from pathlib import Path
+from typing import Optional, Dict, Any, List, Set, Tuple
+from enum import Enum, auto
+from dataclasses import dataclass, field, asdict
+from datetime import datetime
+import sys
 
-# 親ディレクトリをパスに追加
-sys.path.insert(0, str(Path(__file__).parent.parent))
+# プロジェクトルートをパスに追加
+ROOT = Path(__file__).resolve().parent.parent
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
 
-# ログディレクトリ
-LOGS_DIR = Path(__file__).parent.parent / "logs"
-LOGS_DIR.mkdir(parents=True, exist_ok=True)
+# auto.パッケージからimport（統一）
+try:
+    from auto.recorder_wrapper import RecorderWrapper
+except ImportError as e:
+    print(f"[FATAL] Failed to import RecorderWrapper: {e}", file=sys.stderr)
+    sys.exit(1)
+
+# ==================== ロギング設定 ====================
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s [%(levelname)s] %(message)s',
+    datefmt='%Y-%m-%d %H:%M:%S'
+)
+logger = logging.getLogger(__name__)
+
+
+# ==================== 定数定義 ====================
+class QueueConfig:
+    """キュー設定定数"""
+    DEFAULT_MAX_CONCURRENT: int = 2
+    DEFAULT_MAX_RETRIES: int = 3
+    DEFAULT_RETRY_DELAY: int = 10
+    DEFAULT_WORKER_SLEEP: float = 1.0
+    DEFAULT_QUEUE_SIZE_LIMIT: int = 1000
+    DEFAULT_JOB_TIMEOUT: int = 3600  # 1時間
+
+
+# ==================== Enum定義 ====================
+class JobPriority(Enum):
+    """ジョブ優先度（数値が小さいほど優先度高）"""
+    CRITICAL = 1  # 最優先（緊急配信など）
+    HIGH = 2      # 高優先度（通常配信）
+    NORMAL = 3    # 通常
+    LOW = 4       # 低優先度（リトライなど）
+    BACKGROUND = 5  # バックグラウンド
+    
+    def __lt__(self, other):
+        """優先度比較"""
+        if not isinstance(other, JobPriority):
+            return NotImplemented
+        return self.value < other.value
 
 
 class JobStatus(Enum):
-    """ジョブ状態"""
-    PENDING = "pending"
-    RUNNING = "running"
-    DONE = "done"
-    FAILED = "failed"
-    CANCELLED = "cancelled"
+    """ジョブステータス"""
+    PENDING = auto()    # 待機中
+    RUNNING = auto()    # 実行中
+    COMPLETED = auto()  # 完了
+    FAILED = auto()     # 失敗
+    CANCELLED = auto()  # キャンセル
+    RETRYING = auto()   # リトライ中
+    EXPIRED = auto()    # 期限切れ
 
 
-@dataclass
-class RecordJob:
-    """録画ジョブ（優先度付き）"""
-    job_id: str
-    target: str
-    priority: int  # 1が最優先
-    created_at: float
-    status: JobStatus = JobStatus.PENDING
-    started_at: Optional[float] = None
-    finished_at: Optional[float] = None
-    duration_sec: Optional[float] = None
-    worker_id: Optional[str] = None
-    result: dict = field(default_factory=dict)
+# ==================== データクラス ====================
+@dataclass(order=True)
+class RecordingJob:
+    """優先度付き録画ジョブ（拡張版）"""
+    # 比較用フィールド（優先度とタイムスタンプ）
+    priority: int = field(compare=True)
+    created_at: float = field(default_factory=time.time, compare=True)
     
-    def __lt__(self, other):
-        """優先度比較（heapq用）"""
-        return self.priority < other.priority
+    # 基本情報
+    job_id: str = field(compare=False)
+    target: str = field(compare=False)
+    duration: Optional[int] = field(default=None, compare=False)
     
-    def to_dict(self) -> dict:
+    # 時刻情報
+    started_at: Optional[float] = field(default=None, compare=False)
+    completed_at: Optional[float] = field(default=None, compare=False)
+    expires_at: Optional[float] = field(default=None, compare=False)
+    
+    # ステータス情報
+    status: JobStatus = field(default=JobStatus.PENDING, compare=False)
+    result: Optional[Dict[str, Any]] = field(default=None, compare=False)
+    error: Optional[str] = field(default=None, compare=False)
+    
+    # リトライ情報
+    retry_count: int = field(default=0, compare=False)
+    max_retries: int = field(default=QueueConfig.DEFAULT_MAX_RETRIES, compare=False)
+    retry_delay: int = field(default=QueueConfig.DEFAULT_RETRY_DELAY, compare=False)
+    
+    # メタデータ
+    metadata: Dict[str, Any] = field(default_factory=dict, compare=False)
+    
+    def __post_init__(self):
+        """初期化後処理"""
+        # 期限設定（作成から1時間後）
+        if self.expires_at is None:
+            self.expires_at = self.created_at + QueueConfig.DEFAULT_JOB_TIMEOUT
+    
+    def is_expired(self) -> bool:
+        """期限切れ判定"""
+        if self.expires_at is None:
+            return False
+        return time.time() > self.expires_at
+    
+    def can_retry(self) -> bool:
+        """リトライ可能か判定"""
+        return self.retry_count < self.max_retries and not self.is_expired()
+    
+    def elapsed_seconds(self) -> float:
+        """経過時間取得"""
+        if self.completed_at:
+            return self.completed_at - self.created_at
+        elif self.started_at:
+            return time.time() - self.started_at
+        return time.time() - self.created_at
+    
+    def to_dict(self) -> Dict[str, Any]:
         """辞書変換"""
-        return {
-            "job_id": self.job_id,
-            "target": self.target,
-            "priority": self.priority,
-            "status": self.status.value,
-            "worker_id": self.worker_id,
-            "created_at": datetime.fromtimestamp(self.created_at).strftime("%Y-%m-%d %H:%M:%S"),
-            "duration_sec": self.duration_sec
-        }
+        data = asdict(self)
+        data["status"] = self.status.name
+        data["elapsed"] = self.elapsed_seconds()
+        data["is_expired"] = self.is_expired()
+        data["can_retry"] = self.can_retry()
+        return data
 
 
-class PriorityQueue:
-    """優先度付きキュー"""
-    
-    def __init__(self, maxsize: int = 100):
-        self.queue: List[RecordJob] = []
-        self.maxsize = maxsize
-        self._lock = asyncio.Lock()
-        self._not_empty = asyncio.Condition()
-        
-    async def put(self, job: RecordJob):
-        """ジョブ追加"""
-        async with self._lock:
-            if len(self.queue) >= self.maxsize:
-                raise asyncio.QueueFull()
-            heapq.heappush(self.queue, job)
-            
-        async with self._not_empty:
-            self._not_empty.notify()
-            
-    async def get(self) -> RecordJob:
-        """優先度順でジョブ取得"""
-        async with self._not_empty:
-            while not self.queue:
-                await self._not_empty.wait()
-                
-        async with self._lock:
-            return heapq.heappop(self.queue)
-            
-    def qsize(self) -> int:
-        """キューサイズ"""
-        return len(self.queue)
-        
-    def empty(self) -> bool:
-        """空チェック"""
-        return len(self.queue) == 0
-
-
+# ==================== メインクラス ====================
 class JobQueue:
-    """マルチワーカー対応ジョブキュー"""
+    """
+    優先度付きジョブキュー管理（究極版）
+    - 完全なエラーハンドリング
+    - 詳細なステータス管理
+    - 拡張可能な設計
+    """
     
     def __init__(
         self,
-        max_workers: int = 1,
-        max_targets: int = 20,
-        cooldown_sec: int = 60,
-        max_queue_size: int = 100
+        max_concurrent: int = QueueConfig.DEFAULT_MAX_CONCURRENT,
+        max_queue_size: int = QueueConfig.DEFAULT_QUEUE_SIZE_LIMIT
     ):
         """
         初期化
         
         Args:
-            max_workers: 最大同時実行数（5）
-            max_targets: 最大監視対象数（20）
-            cooldown_sec: クールダウン秒数
-            max_queue_size: キュー最大サイズ
+            max_concurrent: 最大同時実行数
+            max_queue_size: キューサイズ上限
         """
-        # 基本設定
-        self.max_workers = max_workers
-        self.max_targets = max_targets
-        self.cooldown_sec = cooldown_sec
+        self.max_concurrent = max_concurrent
+        self.max_queue_size = max_queue_size
         
-        # 優先度付きキュー
-        self.queue = PriorityQueue(maxsize=max_queue_size)
+        # キュー管理
+        self.queue: List[RecordingJob] = []
+        self.active_jobs: Dict[str, RecordingJob] = {}
+        self.completed_jobs: Dict[str, RecordingJob] = {}
+        self.failed_jobs: Dict[str, RecordingJob] = {}
         
-        # 状態管理
-        self.cooldown_map: Dict[str, float] = {}
-        self.running_jobs: Dict[str, RecordJob] = {}  # worker_id -> job
-        self.processed_jobs: List[RecordJob] = []
-        self.monitored_targets: Set[str] = set()
+        # 統計情報
+        self.stats = {
+            "total_added": 0,
+            "total_completed": 0,
+            "total_failed": 0,
+            "total_retried": 0,
+            "total_expired": 0,
+            "total_cancelled": 0
+        }
         
-        # 重複検出
-        self._pending_targets: Set[str] = set()
-        self._running_targets: Set[str] = set()
+        # 制御フラグ
+        self.is_running = False
+        self.is_shutting_down = False
         
         # ワーカー管理
         self.worker_tasks: List[asyncio.Task] = []
-        self._running = False
-        self._state_lock = asyncio.Lock()
+        self._lock = asyncio.Lock()
         
-        # 統計
-        self.stats = {
-            "total_queued": 0,
-            "total_completed": 0,
-            "total_failed": 0,
-            "by_worker": {f"worker_{i}": 0 for i in range(max_workers)}
-        }
+        # RecorderWrapper設定
+        RecorderWrapper.configure(max_concurrent=max_concurrent)
         
-        # ログ
-        self.log_file = LOGS_DIR / f"queue_{datetime.now():%Y%m%d}.jsonl"
-        
-    async def start(self):
-        """全ワーカー起動"""
-        if self._running:
-            self._log_event("already_running", {})
-            return
-            
-        self._running = True
-        
-        # 5つのワーカーを起動
-        self.worker_tasks = [
-            asyncio.create_task(
-                self._run_worker(f"worker_{i}"),
-                name=f"worker_{i}"
-            )
-            for i in range(self.max_workers)
-        ]
-        
-        self._log_event("queue_started", {
-            "max_workers": self.max_workers,
-            "max_targets": self.max_targets,
-            "cooldown_sec": self.cooldown_sec
-        })
-        print(f"[QUEUE] Started with {self.max_workers} workers")
-        
-    async def stop(self):
-        """全ワーカー停止"""
-        self._running = False
-        
-        # すべてのワーカーをキャンセル
-        for task in self.worker_tasks:
-            task.cancel()
-            
-        if self.worker_tasks:
-            await asyncio.gather(*self.worker_tasks, return_exceptions=True)
-            
-        self._log_event("queue_stopped", {"stats": self.stats})
-        print(f"[QUEUE] Stopped (completed: {self.stats['total_completed']})")
-        
-    async def enqueue(
+        logger.info(f"JobQueue initialized (concurrent={max_concurrent}, max_size={max_queue_size})")
+    
+    async def add_job(
         self,
         target: str,
-        priority: int = 10,
-        meta: Optional[dict] = None
-    ) -> dict:
+        duration: Optional[int] = None,
+        priority: JobPriority = JobPriority.NORMAL,
+        job_id: Optional[str] = None,
+        metadata: Optional[Dict[str, Any]] = None,
+        expires_in: Optional[int] = None
+    ) -> Tuple[bool, str]:
         """
-        ジョブ追加（優先度付き）
+        ジョブ追加
         
         Args:
-            target: "c:username" or "g:groupid"
-            priority: 優先度（1が最高、20が最低）
-            meta: メタデータ
+            target: ターゲット識別子
+            duration: 録画時間
+            priority: 優先度
+            job_id: ジョブID
+            metadata: メタデータ
+            expires_in: 有効期限（秒）
             
         Returns:
-            {"status": str, "job_id": str|None, ...}
+            (成功フラグ, ジョブIDまたはエラーメッセージ)
         """
-        # バリデーション
-        if not self._validate_target(target):
-            self._log_event("invalid_target", {"target": target})
-            return {"status": "invalid", "job_id": None}
-            
-        # 監視対象数チェック
-        if len(self.monitored_targets) >= self.max_targets:
-            if target not in self.monitored_targets:
-                self._log_event("max_targets_reached", {
-                    "target": target,
-                    "current": len(self.monitored_targets)
-                })
-                return {"status": "max_targets_reached", "job_id": None}
-                
-        async with self._state_lock:
-            # 監視対象に追加
-            self.monitored_targets.add(target)
-            
-            # クールダウンチェック
-            if self._is_cooldown(target):
-                remaining = self._get_cooldown_remaining(target)
-                self._log_event("cooldown", {
-                    "target": target,
-                    "remaining_sec": remaining
-                })
-                return {
-                    "status": "cooldown",
-                    "job_id": None,
-                    "remaining_sec": remaining
-                }
-                
-            # 重複チェック（待機中）
-            if target in self._pending_targets:
-                self._log_event("already_queued", {"target": target})
-                return {"status": "already_queued", "job_id": None}
-                
-            # 重複チェック（実行中）
-            if target in self._running_targets:
-                # 実行中のジョブを探す
-                running_job = None
-                for job in self.running_jobs.values():
-                    if job and job.target == target:
-                        running_job = job
-                        break
-                        
-                self._log_event("already_running", {
-                    "target": target,
-                    "job_id": running_job.job_id if running_job else "unknown"
-                })
-                return {
-                    "status": "already_running",
-                    "job_id": running_job.job_id if running_job else None
-                }
-                
-            # ジョブ作成
-            job_id = f"{target.replace(':', '_')}_{int(time.time()*1000)}"
-            self._pending_targets.add(target)
-            
-        # ジョブ作成（ロック外）
-        job = RecordJob(
+        # キューサイズチェック
+        async with self._lock:
+            if len(self.queue) >= self.max_queue_size:
+                logger.warning(f"Queue is full ({self.max_queue_size})")
+                return False, "queue_full"
+        
+        # ジョブID生成
+        if not job_id:
+            safe_target = target.replace(":", "_").replace("/", "_")
+            job_id = f"{safe_target}_{int(time.time() * 1000)}"
+        
+        # 期限計算
+        expires_at = None
+        if expires_in:
+            expires_at = time.time() + expires_in
+        
+        # ジョブ作成
+        job = RecordingJob(
+            priority=priority.value,
             job_id=job_id,
             target=target,
-            priority=priority,
-            created_at=time.time()
+            duration=duration,
+            metadata=metadata or {},
+            expires_at=expires_at
         )
         
-        # キュー投入
+        # キューに追加
+        async with self._lock:
+            heapq.heappush(self.queue, job)
+            self.stats["total_added"] += 1
+        
+        logger.info(f"Job added: {job_id} (priority={priority.name}, queue_size={len(self.queue)})")
+        return True, job_id
+    
+    async def cancel_job(self, job_id: str) -> bool:
+        """
+        ジョブキャンセル
+        
+        Args:
+            job_id: ジョブID
+            
+        Returns:
+            キャンセル成功フラグ
+        """
+        async with self._lock:
+            # キュー内を検索
+            for i, job in enumerate(self.queue):
+                if job.job_id == job_id:
+                    job.status = JobStatus.CANCELLED
+                    del self.queue[i]
+                    heapq.heapify(self.queue)
+                    self.stats["total_cancelled"] += 1
+                    logger.info(f"Job cancelled: {job_id}")
+                    return True
+            
+            # アクティブジョブをチェック
+            if job_id in self.active_jobs:
+                self.active_jobs[job_id].status = JobStatus.CANCELLED
+                logger.info(f"Active job marked for cancellation: {job_id}")
+                return True
+        
+        return False
+    
+    async def _process_job(self, job: RecordingJob) -> None:
+        """ジョブ処理（詳細版）"""
+        job.started_at = time.time()
+        job.status = JobStatus.RUNNING
+        
+        async with self._lock:
+            self.active_jobs[job.job_id] = job
+        
         try:
-            await self.queue.put(job)
-        except asyncio.QueueFull:
-            async with self._state_lock:
-                self._pending_targets.discard(target)
-            self._log_event("queue_full", {"target": target})
-            return {"status": "queue_full", "job_id": None}
+            logger.info(f"Processing job: {job.job_id} (retry={job.retry_count})")
             
-        # 成功
-        self.stats["total_queued"] += 1
-        self._log_event("job_queued", {
-            "job_id": job_id,
-            "target": target,
-            "priority": priority,
-            "queue_size": self.queue.qsize()
-        })
-        print(f"[QUEUE] Queued: {job_id} (priority={priority}, size={self.queue.qsize()})")
-        
-        return {
-            "status": "queued",
-            "job_id": job_id,
-            "priority": priority,
-            "queue_size": self.queue.qsize()
-        }
-        
-    async def _run_worker(self, worker_id: str):
-        """ワーカーループ"""
-        print(f"[QUEUE] {worker_id} started")
-        
-        while self._running:
-            try:
-                # ジョブ取得（優先度順）
-                job = await asyncio.wait_for(
-                    self.queue.get(),
-                    timeout=1.0
-                )
-                
-                # 状態更新
-                async with self._state_lock:
-                    self._pending_targets.discard(job.target)
-                    self._running_targets.add(job.target)
-                    self.running_jobs[worker_id] = job
-                    job.worker_id = worker_id
-                    
-                # 実行
-                await self._execute_job(job, worker_id)
-                
-                # 統計更新
-                self.stats["by_worker"][worker_id] += 1
-                
-            except asyncio.TimeoutError:
-                continue
-            except asyncio.CancelledError:
-                break
-            except Exception as e:
-                self._log_event("worker_error", {
-                    "worker_id": worker_id,
-                    "error": str(e)
-                })
-                print(f"[QUEUE] {worker_id} error: {e}")
-                await asyncio.sleep(5)
-                
-        print(f"[QUEUE] {worker_id} stopped")
-        
-    async def _execute_job(self, job: RecordJob, worker_id: str):
-        """ジョブ実行"""
-        try:
-            # 開始
-            job.status = JobStatus.RUNNING
-            job.started_at = time.time()
+            # RecorderWrapper経由で録画
+            result = await RecorderWrapper.start_record(
+                job.target,
+                duration=job.duration,
+                job_id=job.job_id,
+                metadata=job.metadata
+            )
             
-            self._log_event("job_start", {
-                "job_id": job.job_id,
-                "target": job.target,
-                "worker_id": worker_id,
-                "priority": job.priority
-            })
-            print(f"[QUEUE] {worker_id} executing: {job.job_id}")
-            
-            # 録画実行（Cookie分離）
-            result = await self._call_recorder(job.target, job.job_id)
-            
-            # 結果処理
-            job.finished_at = time.time()
-            job.duration_sec = job.finished_at - job.started_at
             job.result = result
+            job.completed_at = time.time()
             
-            if result.get("ok", False):
-                job.status = JobStatus.DONE
-                self.stats["total_completed"] += 1
+            if result.get("ok"):
+                # 成功
+                job.status = JobStatus.COMPLETED
+                async with self._lock:
+                    self.completed_jobs[job.job_id] = job
+                    self.stats["total_completed"] += 1
                 
-                # クールダウン設定
-                async with self._state_lock:
-                    self.cooldown_map[job.target] = job.finished_at
-                    self._cleanup_cooldown_map()
-                    
-                self._log_event("job_done", {
-                    "job_id": job.job_id,
-                    "worker_id": worker_id,
-                    "duration_sec": job.duration_sec
-                })
-                print(f"[QUEUE] {worker_id} completed: {job.job_id} ({job.duration_sec:.1f}s)")
+                logger.info(f"Job completed: {job.job_id} ({job.elapsed_seconds():.1f}s)")
                 
             else:
+                # 失敗
                 job.status = JobStatus.FAILED
-                self.stats["total_failed"] += 1
+                job.error = result.get("reason", "unknown_error")
                 
-                self._log_event("job_failed", {
-                    "job_id": job.job_id,
-                    "worker_id": worker_id,
-                    "reason": result.get("reason", "unknown")
-                })
-                print(f"[QUEUE] {worker_id} failed: {job.job_id}")
-                
+                # リトライ判定
+                if job.can_retry():
+                    job.retry_count += 1
+                    job.status = JobStatus.RETRYING
+                    
+                    # エクスポネンシャルバックオフ
+                    delay = job.retry_delay * (2 ** (job.retry_count - 1))
+                    await asyncio.sleep(min(delay, 60))
+                    
+                    # キューに再追加（優先度を下げて）
+                    job.priority = JobPriority.LOW.value
+                    job.started_at = None
+                    job.status = JobStatus.PENDING
+                    
+                    async with self._lock:
+                        heapq.heappush(self.queue, job)
+                        self.stats["total_retried"] += 1
+                    
+                    logger.info(f"Job scheduled for retry: {job.job_id} ({job.retry_count}/{job.max_retries})")
+                    
+                else:
+                    # リトライ不可
+                    async with self._lock:
+                        self.failed_jobs[job.job_id] = job
+                        self.stats["total_failed"] += 1
+                    
+                    logger.warning(f"Job failed: {job.job_id} - {job.error}")
+                    
+        except asyncio.CancelledError:
+            job.status = JobStatus.CANCELLED
+            async with self._lock:
+                self.stats["total_cancelled"] += 1
+            logger.info(f"Job cancelled during processing: {job.job_id}")
+            raise
+            
         except Exception as e:
             job.status = JobStatus.FAILED
-            job.finished_at = time.time()
-            self.stats["total_failed"] += 1
+            job.error = str(e)
+            job.result = {"error": str(e), "type": type(e).__name__}
             
-            self._log_event("job_error", {
-                "job_id": job.job_id,
-                "worker_id": worker_id,
-                "error": str(e)
-            })
-            print(f"[QUEUE] {worker_id} exception: {e}")
+            async with self._lock:
+                self.failed_jobs[job.job_id] = job
+                self.stats["total_failed"] += 1
+            
+            logger.error(f"Job error: {job.job_id} - {e}")
             
         finally:
-            # 終了処理
-            async with self._state_lock:
-                self._running_targets.discard(job.target)
-                self.running_jobs[worker_id] = None
-                self.processed_jobs.append(job)
-                if len(self.processed_jobs) > 200:  # 5ワーカー分保持
-                    self.processed_jobs = self.processed_jobs[-200:]
+            async with self._lock:
+                self.active_jobs.pop(job.job_id, None)
+    
+    async def _cleanup_expired(self) -> None:
+        """期限切れジョブのクリーンアップ"""
+        async with self._lock:
+            # 期限切れジョブを抽出
+            expired = []
+            remaining = []
+            
+            for job in self.queue:
+                if job.is_expired():
+                    job.status = JobStatus.EXPIRED
+                    expired.append(job)
+                    self.stats["total_expired"] += 1
+                else:
+                    remaining.append(job)
+            
+            if expired:
+                # キューを再構築
+                self.queue = remaining
+                heapq.heapify(self.queue)
+                
+                # 失敗ジョブとして記録
+                for job in expired:
+                    self.failed_jobs[job.job_id] = job
+                
+                logger.info(f"Cleaned up {len(expired)} expired jobs")
+    
+    async def _worker(self, worker_id: int) -> None:
+        """ワーカープロセス（改善版）"""
+        logger.info(f"Worker {worker_id} started")
+        
+        while self.is_running and not self.is_shutting_down:
+            job = None
+            
+            try:
+                # 期限切れクリーンアップ（定期的に）
+                if worker_id == 0:  # 最初のワーカーのみ
+                    await self._cleanup_expired()
+                
+                # ジョブ取得
+                async with self._lock:
+                    if self.queue:
+                        job = heapq.heappop(self.queue)
+                
+                if job:
+                    # キャンセル済みチェック
+                    if job.status == JobStatus.CANCELLED:
+                        logger.debug(f"Skipping cancelled job: {job.job_id}")
+                        continue
                     
-    async def _call_recorder(self, target: str, job_id: str) -> dict:
-        """録画呼び出し（Cookie分離対応）"""
-        try:
-            from auto.recorder_wrapper import RecorderWrapper
-            
-            # Cookie分離のためjob_idを渡す
-            return await RecorderWrapper.start_record(
-                target,
-                job_id=job_id  # Cookie分離用
-            )
-        except ImportError:
-            return {"ok": False, "reason": "import_error"}
-        except Exception as e:
-            return {"ok": False, "reason": f"error:{e.__class__.__name__}"}
-            
-    def _cleanup_cooldown_map(self):
-        """古いクールダウンを削除"""
-        now = time.time()
-        expired = [
-            k for k, v in self.cooldown_map.items()
-            if now - v > self.cooldown_sec * 2
-        ]
-        for k in expired:
-            del self.cooldown_map[k]
-            
-    def _validate_target(self, target: str) -> bool:
-        """ターゲット検証"""
-        if not isinstance(target, str) or len(target) < 3:
-            return False
-        return target.startswith(("c:", "g:"))
+                    # 期限切れチェック
+                    if job.is_expired():
+                        job.status = JobStatus.EXPIRED
+                        async with self._lock:
+                            self.failed_jobs[job.job_id] = job
+                            self.stats["total_expired"] += 1
+                        logger.info(f"Job expired: {job.job_id}")
+                        continue
+                    
+                    logger.debug(f"Worker {worker_id} processing: {job.job_id}")
+                    await self._process_job(job)
+                    
+                else:
+                    # キューが空の場合は少し待機
+                    await asyncio.sleep(QueueConfig.DEFAULT_WORKER_SLEEP)
+                    
+            except asyncio.CancelledError:
+                logger.info(f"Worker {worker_id} cancelled")
+                raise
+                
+            except Exception as e:
+                logger.error(f"Worker {worker_id} error: {e}")
+                await asyncio.sleep(QueueConfig.DEFAULT_WORKER_SLEEP)
         
-    def _is_cooldown(self, target: str) -> bool:
-        """クールダウン判定"""
-        if target not in self.cooldown_map:
-            return False
-        return time.time() - self.cooldown_map[target] < self.cooldown_sec
+        logger.info(f"Worker {worker_id} stopped")
+    
+    async def start(self) -> None:
+        """キュー処理開始"""
+        if self.is_running:
+            logger.warning("Queue already running")
+            return
         
-    def _get_cooldown_remaining(self, target: str) -> int:
-        """クールダウン残り秒数"""
-        if target not in self.cooldown_map:
-            return 0
-        elapsed = time.time() - self.cooldown_map[target]
-        return max(0, int(self.cooldown_sec - elapsed))
+        self.is_running = True
+        self.is_shutting_down = False
         
-    def _log_event(self, event: str, data: dict):
-        """ログ出力"""
-        try:
-            entry = {
-                "t": datetime.now().isoformat(),
-                "event": event,
-                **data
-            }
-            with open(self.log_file, "a", encoding="utf-8") as f:
-                json.dump(entry, f, ensure_ascii=False)
-                f.write("\n")
-        except Exception:
-            pass
+        # ワーカー起動
+        for i in range(self.max_concurrent):
+            task = asyncio.create_task(self._worker(i))
+            self.worker_tasks.append(task)
+        
+        logger.info(f"Queue started with {self.max_concurrent} workers")
+    
+    async def stop(self, timeout: float = 30.0) -> None:
+        """
+        キュー処理停止
+        
+        Args:
+            timeout: 停止タイムアウト（秒）
+        """
+        if not self.is_running:
+            logger.warning("Queue not running")
+            return
+        
+        logger.info("Stopping queue...")
+        self.is_shutting_down = True
+        self.is_running = False
+        
+        # ワーカー停止待機
+        if self.worker_tasks:
+            try:
+                await asyncio.wait_for(
+                    asyncio.gather(*self.worker_tasks, return_exceptions=True),
+                    timeout=timeout
+                )
+            except asyncio.TimeoutError:
+                logger.warning("Worker shutdown timeout, forcing cancel...")
+                for task in self.worker_tasks:
+                    if not task.done():
+                        task.cancel()
+                await asyncio.gather(*self.worker_tasks, return_exceptions=True)
             
-    def get_status(self) -> dict:
-        """ステータス取得"""
+            self.worker_tasks.clear()
+        
+        # RecorderWrapperシャットダウン
+        await RecorderWrapper.shutdown()
+        
+        logger.info("Queue stopped")
+    
+    def get_status(self) -> Dict[str, Any]:
+        """ステータス取得（詳細版）"""
+        # 優先度別カウント
+        priority_counts = {}
+        for job in self.queue:
+            priority_name = JobPriority(job.priority).name
+            priority_counts[priority_name] = priority_counts.get(priority_name, 0) + 1
+        
         return {
-            "running": self._running,
-            "workers": self.max_workers,
-            "queue_size": self.queue.qsize(),
-            "running_jobs": {
-                worker_id: job.to_dict() if job else None
-                for worker_id, job in self.running_jobs.items()
+            "is_running": self.is_running,
+            "is_shutting_down": self.is_shutting_down,
+            "workers": len(self.worker_tasks),
+            "max_concurrent": self.max_concurrent,
+            "queue": {
+                "size": len(self.queue),
+                "max_size": self.max_queue_size,
+                "by_priority": priority_counts
             },
-            "pending_targets": list(self._pending_targets),
-            "running_targets": list(self._running_targets),
-            "cooldown_targets": list(self.cooldown_map.keys()),
-            "monitored_targets": list(self.monitored_targets),
-            "stats": self.stats
+            "active_jobs": len(self.active_jobs),
+            "completed_jobs": len(self.completed_jobs),
+            "failed_jobs": len(self.failed_jobs),
+            "statistics": self.stats
         }
+    
+    def get_job_info(self, job_id: str) -> Optional[Dict[str, Any]]:
+        """
+        ジョブ情報取得
+        
+        Args:
+            job_id: ジョブID
+            
+        Returns:
+            ジョブ情報または None
+        """
+        # アクティブジョブ
+        if job_id in self.active_jobs:
+            return self.active_jobs[job_id].to_dict()
+        
+        # 完了ジョブ
+        if job_id in self.completed_jobs:
+            return self.completed_jobs[job_id].to_dict()
+        
+        # 失敗ジョブ
+        if job_id in self.failed_jobs:
+            return self.failed_jobs[job_id].to_dict()
+        
+        # キュー内
+        for job in self.queue:
+            if job.job_id == job_id:
+                return job.to_dict()
+        
+        return None
+    
+    async def clear_completed(self, older_than: int = 3600) -> int:
+        """
+        完了ジョブのクリア
+        
+        Args:
+            older_than: この秒数より古いジョブをクリア
+            
+        Returns:
+            クリアされたジョブ数
+        """
+        cutoff = time.time() - older_than
+        cleared = 0
+        
+        async with self._lock:
+            to_remove = []
+            for job_id, job in self.completed_jobs.items():
+                if job.completed_at and job.completed_at < cutoff:
+                    to_remove.append(job_id)
+            
+            for job_id in to_remove:
+                del self.completed_jobs[job_id]
+                cleared += 1
+        
+        if cleared > 0:
+            logger.info(f"Cleared {cleared} old completed jobs")
+        
+        return cleared
+
+
+# ==================== テスト用 ====================
+async def main():
+    """メインテスト関数"""
+    print("=== JobQueue Test (v2.0 Ultimate Edition) ===")
+    
+    # キュー作成
+    queue = JobQueue(max_concurrent=2)
+    
+    # ジョブ追加
+    success1, job_id1 = await queue.add_job(
+        "c:teruto_nico",
+        duration=10,
+        priority=JobPriority.HIGH,
+        metadata={"test": True}
+    )
+    print(f"Added job 1: {success1}, {job_id1}")
+    
+    success2, job_id2 = await queue.add_job(
+        "g:testgroup",
+        duration=10,
+        priority=JobPriority.NORMAL,
+        expires_in=60  # 60秒で期限切れ
+    )
+    print(f"Added job 2: {success2}, {job_id2}")
+    
+    # キュー開始
+    await queue.start()
+    
+    # ステータス表示（定期的に）
+    for i in range(3):
+        await asyncio.sleep(5)
+        status = queue.get_status()
+        print(f"\n--- Status at {i*5}s ---")
+        print(json.dumps(status, indent=2))
+        
+        # ジョブ情報取得
+        if job_id1:
+            info = queue.get_job_info(job_id1)
+            if info:
+                print(f"\nJob {job_id1}: {info.get('status')}")
+    
+    # 停止
+    await queue.stop()
+    
+    # 最終ステータス
+    print("\n--- Final Status ---")
+    print(json.dumps(queue.get_status(), indent=2))
 
 
 if __name__ == "__main__":
-    async def test():
-        # 5ワーカーでテスト
-        queue = JobQueue(max_workers=5, max_targets=20)
-        await queue.start()
-        
-        # 優先度付きでジョブ追加
-        targets = [
-            ("c:teruto_nico", 1),  # 最優先
-            ("c:user2", 5),
-            ("c:user3", 10),
-            ("c:user4", 15),
-            ("c:user5", 20),  # 最低優先
-        ]
-        
-        for target, priority in targets:
-            result = await queue.enqueue(target, priority=priority)
-            print(f"Enqueue {target}: {result}")
-            
-        # ステータス確認
-        print(f"Status: {json.dumps(queue.get_status(), indent=2)}")
-        
-        await asyncio.sleep(10)
-        await queue.stop()
-        
-    asyncio.run(test())
+    asyncio.run(main())

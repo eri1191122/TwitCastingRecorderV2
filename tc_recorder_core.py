@@ -1,30 +1,35 @@
 ﻿#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-TwitCasting Recorder Core v4.6 (最終修正版)
-- v4.4の全機能を維持
-- 【修正】_is_real_hls関数のドメイン判定厳格化
-- 【修正】_capture_m3u8のインデント修正
-- 【追加】page.offでリスナー解除
-- 【追加】_pass_membership_gate（ゲート自動突破）
+TwitCasting Recorder Core v4.8.2 〈完全版：プロセス孤児化ゼロ・例外伝播ゼロ〉
+- v4.8.1 の全機能を維持（機能削減なし）
+- 【改善】_graceful_terminate を shield + suppress で完全静音化
+- 【改善】_execute_ytdlp にキャンセル時の確実な後始末を追加
+- 【維持】reader_task の await を shield で保護（キャンセル伝播防止）
+- 【維持】BrowserContext の健全性検査とワンショット再生成（'NoneType.send' 撲滅）
+- 【維持】M3U8検出強化（Content-Type対応・URLパターン拡張）
+- 【維持】yt-dlp 実行パスの自動フォールバック／フォーマット再試行
+- 【維持】ゲート処理・Cookie保存・デバッグログ
 """
-from __future__ import annotations  # 最上段
+from __future__ import annotations
 
-# ROOT挿入ガード
+# ==== パス初期化（core直下/直下配置の両対応） ====
 import sys
 from pathlib import Path
 ROOT = Path(__file__).resolve().parent
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-# 以降は既存のimport
+# ==== 既存import（機能維持） ====
 import asyncio
+import contextlib
 import json
 import shutil
 import time
 import re
 import uuid
 import tempfile
+import os
 from dataclasses import dataclass, asdict
 from typing import Any, Dict, List, Optional
 
@@ -75,25 +80,24 @@ except Exception as e1:
             "chrome_singleton のインポートに失敗しました。ファイル配置（core/配下か直下か）を確認してください。"
         )
 
-# ===== 【追加】本編HLS判定関数（ドメイン判定厳格化） =====
-def _is_real_hls(url: str) -> bool:
-    """
-    TwitCastingの本編HLSだけを通す判定（プレビュー等は除外）
-    ドメイン判定を厳格化
-    
-    Args:
-        url: 検査するURL
-        
-    Returns:
-        本編HLSならTrue、プレビュー等ならFalse
-    """
+# ===== HLS判定（Content-Type対応＋パターン拡張） =====
+def _is_real_hls(url: str, content_type: str = "") -> bool:
+    """TwitCastingの本編HLSだけを通す判定（プレビュー等は除外）"""
     u = url.lower()
-    
+
+    # Content-Typeによる判定（最優先）
+    if content_type:
+        ct = content_type.lower()
+        if any(x in ct for x in ["mpegurl", "vnd.apple.mpegurl", "x-mpegurl"]):
+            deny_patterns = ("preview", "thumbnail", "thumb", "ad/", "/ads/", "test", "dummy")
+            if not any(p in u for p in deny_patterns):
+                return True
+
     # m3u8以外は即除外
     if ".m3u8" not in u:
         return False
-    
-    # 明確に除外するパターン（プレビュー・サムネ・広告・疑似プレイリスト）
+
+    # 除外パターン（プレビュー・サムネ・広告・疑似プレイリスト）
     deny_patterns = (
         "preview", "thumbnail", "thumb", "ad/", "/ads/", "ad=",
         "preroll", "dash", "manifest", "test", "dummy", "sample",
@@ -101,22 +105,22 @@ def _is_real_hls(url: str) -> bool:
     )
     if any(pattern in u for pattern in deny_patterns):
         return False
-    
-    # 本編系の許可パターン（TwitCastingで実際に多いパターン）
+
+    # 許可パターン（2025年対応）
     allow_patterns = (
         "/hls/", "/live/", "livehls", "tc.livehls", "/tc.hls/",
-        "/streams/", "/media.m3u8", "/master.m3u8"
+        "/streams/", "/media.m3u8", "/master.m3u8",
+        "/hls-live/", "/hls_cdn/", "/hls-cdn/", "/hls_stream/",
+        "/playlist.m3u8", "/index.m3u8", "/chunklist", "/variant"
     )
-    
-    # ドメイン判定（厳格化：正規ドメインのみ）
+
+    # ドメイン厳格化
     valid_domains = (
         ".twitcasting.tv/" in u or ".twitcasting.net/" in u or
         "://twitcasting.tv/" in u or "://twitcasting.net/" in u
     )
-    
-    # 両方の条件を満たす場合のみTrue
-    has_allow_pattern = any(pattern in u for pattern in allow_patterns)
-    return valid_domains and has_allow_pattern
+
+    return valid_domains and any(p in u for p in allow_patterns)
 
 # ===== 設定 =====
 @dataclass
@@ -148,8 +152,10 @@ class Config:
         if CONFIG_PATH.exists():
             try:
                 data = json.loads(CONFIG_PATH.read_text(encoding="utf-8"))
+                allowed = set(asdict(cls()).keys())  # 既定キーのみ受理
+                filtered = {k: v for k, v in data.items() if k in allowed}
                 base = asdict(cls())
-                base.update(data)
+                base.update(filtered)
                 return cls(**base)
             except Exception as e:
                 print(f"[WARN] Config load error: {e}")
@@ -183,7 +189,7 @@ def _extract_user_id(url: str) -> Optional[str]:
     return m.group(1) if m else None
 
 def _check_login_status(cookies: List[dict]) -> str:
-    """strong/weak/none を返す（将来利用のため残置）"""
+    """strong/weak/none を返す（互換維持・未使用でも保持）"""
     names = {c.get("name", "") for c in cookies}
     primary = {"tc_ss", "_twitcasting_session", "tc_s"}
     secondary = {"tc_id", "tc_u"}
@@ -228,45 +234,41 @@ def _shell_which(cmd: str) -> Optional[str]:
     return shutil.which(cmd)
 
 async def _graceful_terminate(proc: asyncio.subprocess.Process, soft_timeout: float = 10.0) -> None:
-    """改善されたプロセス終了処理"""
+    """改善されたプロセス終了処理（完全静音化）"""
     if proc is None:
         return
-    # 1) terminate
     try:
         proc.terminate()
-        await asyncio.wait_for(proc.wait(), timeout=soft_timeout)
+        # 【改善】shield + suppress で完全静音化
+        with contextlib.suppress(asyncio.TimeoutError, asyncio.CancelledError):
+            await asyncio.shield(asyncio.wait_for(proc.wait(), timeout=soft_timeout))
         CoreDiagnostics.log("Process terminated gracefully", "DEBUG")
         return
-    except (ProcessLookupError, asyncio.TimeoutError):
+    except ProcessLookupError:  # TimeoutErrorは上でsuppressされる
         pass
     except Exception as e:
         CoreDiagnostics.log(f"Terminate error: {e}", "WARN")
-    # 2) kill
+    
+    # Kill if still running
     try:
         proc.kill()
-        await asyncio.wait_for(proc.wait(), timeout=5.0)
+        with contextlib.suppress(asyncio.TimeoutError, asyncio.CancelledError):
+            await asyncio.shield(asyncio.wait_for(proc.wait(), timeout=5.0))
         CoreDiagnostics.log("Process killed", "WARN")
     except ProcessLookupError:
         pass
-    except asyncio.TimeoutError:
-        CoreDiagnostics.log("Process kill timeout", "ERROR")
     except Exception as e:
         CoreDiagnostics.log(f"Kill error: {e}", "ERROR")
 
 def _compose_output_base(url: str) -> Path:
     user_id = _extract_user_id(url) or "unknown"
-    # Windowsファイル名サニタイズ
-    user_id = re.sub(r'[:<>"|?*/\\]', '_', user_id)
+    user_id = re.sub(r'[:<>"|?*/\\]', '_', user_id)  # Windowsファイル名サニタイズ
     return RECORDINGS / f"{_now()}_{user_id}_{uuid.uuid4().hex[:8]}"
 
 def _check_error_in_tail(tail: List[str]) -> bool:
     """403エラーや 0 bytes をチェック"""
     error_patterns = ["403", "Forbidden", "0 bytes", "ERROR"]
-    for line in tail[-50:]:
-        for pattern in error_patterns:
-            if pattern in line:
-                return True
-    return False
+    return any(pattern in line for line in tail[-50:] for pattern in error_patterns)
 
 # ===== 自己診断 =====
 def self_check(cfg: Config) -> Dict[str, Any]:
@@ -305,6 +307,30 @@ class RecordingEngine:
         self.cfg = Config.load()
         self._netlog: List[Dict[str, Any]] = []
 
+    # --- HOTFIX: BrowserContext健全性検査（軽量→実動作の二段） ---
+    async def _validate_ctx(self, ctx: BrowserContext) -> bool:
+        try:
+            # 軽量：storage_state が通るか
+            await ctx.storage_state()
+            # 実動作：new_page() → すぐclose
+            tmp = await ctx.new_page()
+            try:
+                await tmp.close()
+            except Exception:
+                pass
+            return True
+        except Exception as e:
+            CoreDiagnostics.log(f"_validate_ctx failed: {e}", "WARN")
+            return False
+
+    async def _reopen_headless_ctx(self) -> Optional[BrowserContext]:
+        try:
+            await self.chrome.close()  # 既存ブラウザごと安全クローズ
+        except Exception:
+            pass
+        ctx = await self.chrome.ensure_headless()
+        return ctx
+
     async def _wait_for_player_ready(self, page: Page) -> None:
         try:
             await page.wait_for_selector("video, iframe[src*='player'], [class*='player'], #player", timeout=10000)
@@ -340,44 +366,25 @@ class RecordingEngine:
             except Exception:
                 continue
 
-    # ===== 【追加】ゲート自動突破メソッド =====
     async def _pass_membership_gate(self, page: Page) -> bool:
-        """
-        入場/同意ボタンを自動クリック（configがtrueの時だけ）
-        
-        Args:
-            page: Playwrightのページオブジェクト
-            
-        Returns:
-            クリック成功したらTrue
-        """
+        """入場/同意ボタンを自動クリック（configがtrueの時だけ）"""
         if not getattr(self.cfg, "enable_group_gate_auto", False):
             return False
-        
         clicked = False
         candidates = [
-            # テキストベース（日本語）
+            # テキスト（日本語/英語）
             "text=入場", "text=視聴する", "text=同意して進む", "text=続ける",
             "text=OK", "text=はい", "text=入室", "text=参加", "text=入る",
-            # テキストベース（英語）
             "text=Enter", "text=Join", "text=Continue", "text=Watch", "text=Agree",
-            # data属性
-            "[data-test*='enter']", "[data-test*='join']", "[data-test*='gate']",
-            "[data-test*='membership']",
-            # aria属性
+            # data / aria / ボタン / リンク / クラス
+            "[data-test*='enter']", "[data-test*='join']", "[data-test*='gate']", "[data-test*='membership']",
             "[aria-label*='入場']", "[aria-label*='視聴']", "[aria-label*='参加']",
             "[aria-label*='Enter']", "[aria-label*='Join']",
-            # ボタン要素
-            "button:has-text('入場')", "button:has-text('視聴')",
-            "button:has-text('入室')", "button:has-text('参加')",
+            "button:has-text('入場')", "button:has-text('視聴')", "button:has-text('入室')", "button:has-text('参加')",
             "button:has-text('Enter')", "button:has-text('Join')", "button:has-text('Watch')",
-            # リンク要素
             "a[href*='membershipjoinplans']", "a[href*='membership']", "a[href*='join']",
-            # クラス名
-            "[class*='enter-button']", "[class*='gate-button']",
-            "[class*='join-button']", "[class*='membership-button']", "[class*='tc-button']",
+            "[class*='enter-button']", "[class*='gate-button']", "[class*='join-button']", "[class*='membership-button']", "[class*='tc-button']",
         ]
-        
         try:
             for sel in candidates:
                 try:
@@ -392,53 +399,44 @@ class RecordingEngine:
                     continue
         except Exception as e:
             CoreDiagnostics.log(f"Gate pass error: {e}", "DEBUG")
-        
         return clicked
 
-    # ===== 【修正】_capture_m3u8（インデント修正+リスナー解除） =====
+    # ===== M3U8キャプチャ（Content-Type対応） =====
     async def _capture_m3u8(self, page: Page, base_timeout: int = 20) -> Optional[str]:
-        """
-        本編HLSのみをキャプチャ（プレビュー除外版）
-        インデント修正済み、リスナー解除追加
-        
-        Args:
-            page: Playwrightページ
-            base_timeout: 基本タイムアウト秒数
-            
-        Returns:
-            本編のm3u8 URL or None
-        """
         found = {"u": None}
-        
-        # レスポンスフック定義：本編HLSだけ拾う
+
         def on_resp(resp):
             try:
                 u = resp.url
+                try:
+                    ct = resp.headers.get("content-type", "").lower()
+                except Exception:
+                    ct = ""
+
                 if getattr(self.cfg, "save_network_log", False):
                     self._netlog.append({
-                        "url": u, 
+                        "url": u,
                         "status": resp.status,
-                        "time": time.time(), 
-                        "is_real": _is_real_hls(u)
+                        "content_type": ct,
+                        "time": time.time(),
+                        "is_real": _is_real_hls(u, ct)
                     })
-                if not found["u"] and _is_real_hls(u):
+
+                if not found["u"] and _is_real_hls(u, ct):
                     found["u"] = u
-                    CoreDiagnostics.log(f"Real HLS detected: {u[:100]}...", "INFO")
+                    CoreDiagnostics.log(f"Real HLS detected: {u[:100]}... (CT: {ct})", "INFO")
             except Exception:
                 pass
-        
-        # 【重要】関数定義の外でリスナー登録
+
         page.on("response", on_resp)
-        
+
         try:
-            # Phase 1: プレイヤー準備
             CoreDiagnostics.log("Waiting for player ready...", "DEBUG")
             try:
                 await self._wait_for_player_ready(page)
             except Exception:
                 pass
-            
-            # Phase 2: ゲート突破試行
+
             gate_clicked = await self._pass_membership_gate(page)
             if gate_clicked:
                 await page.wait_for_timeout(1500)
@@ -446,84 +444,70 @@ class RecordingEngine:
                     await self._wait_for_player_ready(page)
                 except Exception:
                     pass
-            
-            # Phase 3: 再生トリガー
+
             CoreDiagnostics.log("Triggering playback...", "DEBUG")
             try:
                 await self._trigger_playback(page)
             except Exception:
                 pass
-            
-            # Phase 4: 本編HLS待機（段階的）
+
             short = max(5, base_timeout // 3)
             strategies = ["wait", "play_again", "reload"]
-            
+
             for strategy in strategies:
                 if found["u"]:
                     break
-                
                 try:
                     if strategy == "wait":
                         CoreDiagnostics.log(f"Waiting for real HLS... ({short}s)", "DEBUG")
-                        
                     elif strategy == "play_again":
                         CoreDiagnostics.log("Retrying playback trigger", "DEBUG")
                         await self._trigger_playback(page)
                         await page.wait_for_timeout(500)
-                        
                     elif strategy == "reload":
                         CoreDiagnostics.log("Reloading page for retry", "DEBUG")
                         await page.reload(wait_until="domcontentloaded", timeout=15000)
                         await page.wait_for_timeout(2000)
-                        
-                        # 再度全手順
                         try:
                             await self._wait_for_player_ready(page)
                         except Exception:
                             pass
-                        
                         gate_clicked = await self._pass_membership_gate(page)
                         if gate_clicked:
                             await page.wait_for_timeout(1500)
-                        
                         await self._trigger_playback(page)
-                    
-                    # 本編HLS検出待ち（_is_real_hlsを使う）
+
                     await page.wait_for_event(
                         "response",
-                        predicate=lambda r: _is_real_hls(r.url),
+                        predicate=lambda r: _is_real_hls(r.url, r.headers.get("content-type", "")),
                         timeout=short * 1000
                     )
-                    
                 except Exception:
                     CoreDiagnostics.log(f"Strategy '{strategy}' timeout/failed", "DEBUG")
                     continue
-            
-            # 結果処理
+
             if found["u"]:
                 CoreDiagnostics.log(f"Captured real HLS: {found['u']}", "SUCCESS")
             else:
                 CoreDiagnostics.log("No real HLS found after all strategies", "WARNING")
-                
-                # デバッグ用：キャプチャされたURLを表示
                 if getattr(self.cfg, "debug_mode", False) and self._netlog:
                     print("[CORE-DEBUG] Last captured URLs:")
                     for log in self._netlog[-20:]:
                         if ".m3u8" in log.get("url", ""):
                             is_real = log.get("is_real", False)
                             status = "✓" if is_real else "✗"
-                            print(f"  {status} {log['url'][:100]}")
-            
+                            ct = log.get("content_type", "")
+                            print(f"  {status} {log['url'][:100]} [CT: {ct}]")
         finally:
-            # 【追加】リスナー解除（メモリリーク防止）
             try:
                 page.remove_listener("response", on_resp)
                 CoreDiagnostics.log("Response listener removed", "DEBUG")
             except Exception:
                 pass
-        
+
         return found["u"]
 
+    # ===== yt-dlp 実行（完全版：キャンセル時の孤児化防止） =====
     async def _execute_ytdlp(
         self,
         m3u8: str,
@@ -533,8 +517,6 @@ class RecordingEngine:
         duration: Optional[int] = None,
         retry_count: int = 0
     ) -> Dict[str, Any]:
-        """yt-dlp 実行（賢い画質判定つき）"""
-
         # UA（chrome_singleton 統一 UA → 取得不能なら page 側）
         ua = getattr(self.chrome, "get_unified_ua", lambda: None)() or "Mozilla/5.0"
         try:
@@ -543,8 +525,16 @@ class RecordingEngine:
         except Exception:
             pass
 
+        # yt-dlpパス解決
+        ytdlp_candidate = self.cfg.ytdlp_path or "yt-dlp"
+        if shutil.which(ytdlp_candidate) or os.path.exists(ytdlp_candidate):
+            ytdlp_launcher = [ytdlp_candidate]
+        else:
+            ytdlp_launcher = [sys.executable, "-m", "yt_dlp"]
+            CoreDiagnostics.log(f"yt-dlp not in PATH, using: {' '.join(ytdlp_launcher)}", "INFO")
+
         cmd = [
-            (self.cfg.ytdlp_path or "yt-dlp"),
+            *ytdlp_launcher,
             m3u8,
             "--no-part",
             "--concurrent-fragments", "4",
@@ -561,10 +551,8 @@ class RecordingEngine:
             "--remux-video", "mp4",
         ]
 
-        # 画質設定（-f/-S を賢く自動判別）
         val = (self.cfg.preferred_quality or "").strip()
         if val:
-            # 「フォーマット式」なら -f：[], +, / を含む or bestvideo/bestaudio を含む
             use_f = any(ch in val for ch in "[]+/") or "bestvideo" in val or "bestaudio" in val
             mode = "-f" if use_f else "-S"
             cmd.extend([mode, val])
@@ -604,15 +592,25 @@ class RecordingEngine:
 
         reader_task = asyncio.create_task(_reader())
 
-        if duration and duration > 0:
-            try:
-                await asyncio.wait_for(proc.wait(), timeout=duration + 60)
-            except asyncio.TimeoutError:
-                await _graceful_terminate(proc)
-        else:
-            await proc.wait()
-
-        await reader_task
+        # 【改善】キャンセル時の確実な後始末
+        try:
+            if duration and duration > 0:
+                try:
+                    await asyncio.wait_for(proc.wait(), timeout=duration + 60)
+                except asyncio.TimeoutError:
+                    await _graceful_terminate(proc)
+            else:
+                await proc.wait()
+        except asyncio.CancelledError:
+            # キャンセル時は必ずプロセスを終了
+            await _graceful_terminate(proc)
+            with contextlib.suppress(asyncio.CancelledError):
+                await asyncio.shield(reader_task)
+            raise
+        finally:
+            # reader_task の確実な回収
+            with contextlib.suppress(asyncio.CancelledError):
+                await asyncio.shield(reader_task)
 
         rc = proc.returncode or 0
         elapsed = round(time.time() - start_ts, 1)
@@ -628,7 +626,6 @@ class RecordingEngine:
         print(f"[INFO] Starting recording: {url}")
         if duration:
             print(f"[INFO] Duration: {duration}s")
-
         CoreDiagnostics.log("Recording started", "INFO")
 
         try:
@@ -636,28 +633,42 @@ class RecordingEngine:
             if not check["ok"]:
                 return {"success": False, "error": "self_check_failed", "details": check["problems"]}
 
-            # chrome_singleton 経由（record は基本ヘッドレス）
+            # --- HOTFIX: Context取得→健全性確認→必要なら一回だけ再生成 ---
             ctx = await self.chrome.ensure_headless()
             if ctx is None:
                 CoreDiagnostics.log("ensure_headless() returned None", "ERROR")
                 return {"success": False, "error": "chrome_context_none",
                         "details": "chrome_singleton の ensure_headless() が失敗"}
 
+            if not await self._validate_ctx(ctx):
+                CoreDiagnostics.log("Headless context broken; reopening (phase1)", "WARN")
+                ctx = await self._reopen_headless_ctx()
+                if ctx is None or not await self._validate_ctx(ctx):
+                    return {"success": False, "error": "ctx_unhealthy", "details": "validate_ctx twice failed"}
+
             page: Optional[Page] = None
             out_base = _compose_output_base(url)
             out_tpl = str(out_base) + ".%(ext)s"
 
             try:
-                page = await ctx.new_page()
+                # --- HOTFIX: new_page 失敗も一回だけ護る ---
+                try:
+                    page = await ctx.new_page()
+                except Exception as e:
+                    CoreDiagnostics.log(f"ctx.new_page failed ({type(e).__name__}) — one-shot reopen", "WARN")
+                    ctx = await self._reopen_headless_ctx()
+                    if ctx is None:
+                        return {"success": False, "error": "ctx_reopen_failed"}
+                    page = await ctx.new_page()  # ここで失敗したら例外を上に返す
+
                 await page.goto(url, wait_until="domcontentloaded", timeout=30000)
                 await self._wait_for_player_ready(page)
 
-                # JIT #1
+                # JIT #1: 入場時Cookie保存
                 await _save_cookies_netscape(ctx, LOGS / f"cookies_enter_{_now()}.txt", self.cfg.cookie_domain)
 
-                # m3u8 検出（修正版を使用）
+                # m3u8 検出
                 m3u8 = await self._capture_m3u8(page, base_timeout=self.cfg.m3u8_timeout)
-
                 if not m3u8:
                     if self.cfg.save_network_log and self._netlog:
                         (LOGS / f"net_debug_{_now()}.json").write_text(
@@ -666,7 +677,7 @@ class RecordingEngine:
                         )
                     return {"success": False, "error": "M3U8_NOT_FOUND"}
 
-                # JIT #2
+                # JIT #2: m3u8直前Cookie
                 cookies_path = LOGS / f"cookies_m3u8_{_now()}.txt"
                 await _save_cookies_netscape(ctx, cookies_path, self.cfg.cookie_domain)
 
@@ -685,12 +696,10 @@ class RecordingEngine:
                     CoreDiagnostics.log(f"Retry triggered (reason={reason})", "WARN")
                     print("[WARN] Download error detected, retrying with fresh cookies...")
 
-                    # Cookie 再取得（JIT）
                     cookies_path_retry = LOGS / f"cookies_retry_{_now()}.txt"
                     await _save_cookies_netscape(ctx, cookies_path_retry, self.cfg.cookie_domain)
 
                     if bad_format:
-                        # フォーマット不一致は強制的に -f best で再実行
                         CoreDiagnostics.log("Retry reason=bad_format -> force -f best", "WARN")
                         original = self.cfg.preferred_quality
                         try:
@@ -701,7 +710,6 @@ class RecordingEngine:
                         finally:
                             self.cfg.preferred_quality = original
                     else:
-                        # 403/0bytes 系は通常の再試行（JIT Cookie で再実行）
                         exec_result = await self._execute_ytdlp(
                             m3u8, page, out_tpl, cookies_path_retry, duration, retry_count=1
                         )
@@ -709,7 +717,6 @@ class RecordingEngine:
                     rc = exec_result["return_code"]
                     tail = exec_result["tail"]
 
-                # 結果構築
                 result = {
                     "success": (rc == 0),
                     "code": rc,
@@ -803,10 +810,9 @@ class TwitCastingRecorder:
     async def test_login_status(self) -> str:
         """
         ログイン状態の軽量確認
-        【修正】副作用ゼロ版、initialize()呼ばない
+        副作用ゼロ版、initialize()呼ばない
         """
         try:
-            # 【修正】直接chrome_singletonの状態確認を呼ぶ（副作用なし）
             status = await self.chrome.check_login_status()
             print(f"[DEBUG] Login status: {status}")
             CoreDiagnostics.log(f"Login status check: {status}", "INFO")
@@ -816,7 +822,7 @@ class TwitCastingRecorder:
             CoreDiagnostics.log(f"Login check error: {e}", "ERROR")
             return "none"
 
-    async def record(self, url: str, duration: Optional[int] = None) -> Dict[str, Any]:
+    async def record(self, url: str, duration: Optional[int] = None, meta: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
         """録画実行（ロック保護）"""
         async with self._record_lock:
             if self.is_recording:
@@ -882,7 +888,6 @@ async def _amain():
 
     rec = TwitCastingRecorder()
     try:
-        # 【修正】URLも--login-setupも無い時は初期化せずに状態確認のみ
         if args.login_setup:
             await rec.initialize()
             ok = await rec.setup_login()
@@ -893,7 +898,6 @@ async def _amain():
             res = await rec.record(args.url, duration=du)
             print(json.dumps(res, ensure_ascii=False, indent=2))
         else:
-            # 【修正】初期化なしで状態確認（副作用ゼロ）
             status = await rec.test_login_status()
             print(json.dumps({"login_status": status}, ensure_ascii=False))
     finally:

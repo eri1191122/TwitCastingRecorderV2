@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Facade for TwitCastingRecorder v2.0 (最終完成版)
+Facade for TwitCastingRecorder v2.1 (エンジン初期化保証版)
 - 初期化を完全遅延（GUI起動時にChrome起動しない）
 - ChromeSingletonとの完璧な連携
+- meta引数の互換性確保
+- ログイン後のエンジン初期化を確実に実行
 - 不要コード削除でシンプル化
 """
 from __future__ import annotations
@@ -84,9 +86,11 @@ def get_paths() -> Dict[str, Path]:
 # ======================= メインクラス =======================
 class TwitCastingRecorder:
     """
-    GUI互換性のためのメインクラス（最終版）
+    GUI互換性のためのメインクラス（v2.1）
     - 完全な遅延初期化
     - ChromeSingletonの新仕様に完全対応
+    - meta引数の互換性確保
+    - エンジン初期化の確実な実行
     """
     
     def __init__(self) -> None:
@@ -94,6 +98,7 @@ class TwitCastingRecorder:
         self._initialized = False
         self.is_recording = False
         self._record_lock = asyncio.Lock()
+        self._init_lock = asyncio.Lock()  # 初期化の排他制御
         
         # ChromeSingleton取得（起動はしない）
         try:
@@ -117,37 +122,55 @@ class TwitCastingRecorder:
         """
         初期化（必要時のみ呼ばれる）
         常にヘッドレスで初期化
+        冪等性を保証（何度呼んでも安全）
         """
-        if self._initialized:
-            return
-            
-        try:
-            # 【重要】常にヘッドレスで初期化（見えないように）
-            await self.chrome.ensure_headless()
-            
-            # Core初期化
-            from tc_recorder_core import RecordingEngine
-            self._engine = RecordingEngine(self.chrome)
-            
-            self._initialized = True
-            logger.info("Facade initialized successfully (headless)")
-        except Exception as e:
-            logger.error(f"Failed to initialize: {e}")
-            raise InitializationError(f"Initialization failed: {e}") from e
+        async with self._init_lock:  # 排他制御
+            # 既に初期化済みかつエンジンも存在すれば何もしない
+            if self._initialized and self._engine is not None:
+                logger.debug("Already initialized with engine")
+                return
+                
+            try:
+                # 【重要】常にヘッドレスで初期化（見えないように）
+                await self.chrome.ensure_headless()
+                
+                # Core初期化（エンジンがない場合のみ作成）
+                if self._engine is None:
+                    from tc_recorder_core import RecordingEngine
+                    self._engine = RecordingEngine(self.chrome)
+                    logger.info("RecordingEngine created successfully")
+                
+                self._initialized = True
+                logger.info("Facade initialized successfully (headless)")
+            except Exception as e:
+                logger.error(f"Failed to initialize: {e}")
+                # 失敗時は状態をリセット
+                self._initialized = False
+                self._engine = None
+                raise InitializationError(f"Initialization failed: {e}") from e
             
     async def setup_login(self) -> bool:
         """
         ログインセットアップ
         ChromeSingletonが自動で可視→ヘッドレス切り替え
+        成功時は必ずエンジンも初期化する
         """
         try:
             # ログインウィザード実行（Chrome側で可視→ヘッドレス自動切り替え）
             result = await self.chrome.guided_login_wizard()
             logger.info(f"Login setup result: {result}")
             
-            # 成功時は初期化済みとマーク
+            # 成功時は完全初期化（エンジン生成を保証）
             if result:
-                self._initialized = True
+                logger.info("Login successful, initializing engine...")
+                await self.initialize()  # エンジンを確実に作る
+                
+                # エンジンが正常に作られたか確認
+                if self._engine is None:
+                    logger.error("Engine creation failed after login")
+                    return False
+                    
+                logger.info("Engine initialized after login")
                 
             return bool(result)
         except Exception as e:
@@ -175,10 +198,17 @@ class TwitCastingRecorder:
             logger.error(f"Login status check error: {e}")
             return "none"
             
-    async def record(self, url: str, duration: Optional[int] = None) -> Dict[str, Any]:
+    async def record(self, url: str, duration: Optional[int] = None, **kwargs) -> Dict[str, Any]:
         """
         録画実行
         初回のみ初期化（遅延初期化）
+        エンジンの存在を確実に保証
+        
+        Args:
+            url: 録画対象URL
+            duration: 録画時間（秒）
+            **kwargs: 追加パラメータ（meta等、将来の拡張用）
+                     - meta: メタデータ辞書（現在は未使用だが受け取る）
         """
         async with self._record_lock:
             if self.is_recording:
@@ -186,22 +216,47 @@ class TwitCastingRecorder:
                 
             self.is_recording = True
             try:
-                # 【重要】初回のみ初期化（ヘッドレス）
-                if not self._initialized:
+                # 【重要】初期化条件を厳格化：フラグまたは実体どちらか欠けても初期化
+                if (not self._initialized) or (self._engine is None):
+                    logger.info("Initializing before recording (initialized=%s, engine=%s)", 
+                               self._initialized, self._engine is not None)
                     await self.initialize()
                 
+                # エンジンの存在を再確認（安全網）
+                if self._engine is None:
+                    logger.error("Engine still None after initialization attempt")
+                    return {
+                        "success": False,
+                        "error": "Engine initialization failed",
+                        "tail": []
+                    }
+                
+                # kwargsから既知のパラメータを抽出（将来の拡張用）
+                meta = kwargs.pop('meta', None)
+                
+                # metaが渡された場合はデバッグログ
+                if meta:
+                    logger.debug(f"Received meta data (currently unused): {meta}")
+                
+                # 未知のkwargsがあれば警告（デバッグ用）
+                if kwargs:
+                    logger.debug(f"Unknown kwargs passed to record(): {list(kwargs.keys())}")
+                
                 # 録画エンジン経由で実行
-                if self._engine:
-                    result = await self._engine.record(url, duration)
+                logger.info(f"Starting recording: {url} (duration={duration})")
+                result = await self._engine.record(url, duration)
+                
+                # 結果のログ
+                success = result.get('success', False)
+                if success:
+                    logger.info(f"Recording completed successfully: {url}")
                 else:
-                    # エンジンがない場合はエラー
-                    result = {"success": False, "error": "Engine not initialized"}
+                    logger.warning(f"Recording failed: {url} - {result.get('error', 'Unknown error')}")
                     
-                logger.info(f"Recording completed: success={result.get('success', False)}")
                 return result
                 
             except Exception as e:
-                logger.error(f"Recording error: {e}")
+                logger.error(f"Recording error: {e}", exc_info=True)
                 return {
                     "success": False,
                     "error": str(e),
@@ -228,6 +283,8 @@ class TwitCastingRecorder:
             await self.chrome.close()
             self._initialized = False
             self.is_recording = False
+            self._engine = None
+            self._core = None
             
         logger.info("Facade closed")
         
@@ -245,6 +302,18 @@ class TwitCastingRecorder:
     def engine(self):
         """録画エンジン参照"""
         return self._engine
+        
+    # ======================= デバッグ用メソッド =======================
+    def get_status(self) -> Dict[str, Any]:
+        """
+        現在の状態を取得（デバッグ用）
+        """
+        return {
+            "initialized": self._initialized,
+            "engine_exists": self._engine is not None,
+            "is_recording": self.is_recording,
+            "chrome_exists": self.chrome is not None,
+        }
 
 # ======================= テスト =======================
 if __name__ == "__main__":
@@ -254,27 +323,40 @@ if __name__ == "__main__":
     )
     
     async def test():
-        print("=== Facade Test ===")
+        print("=== Facade Test v2.1 ===")
         rec = TwitCastingRecorder()
         
+        # 初期状態確認
+        print("0. Initial status:")
+        print(f"   {rec.get_status()}")
+        
         # 状態確認（Chrome起動しない）
-        print("1. Checking login status...")
+        print("\n1. Checking login status...")
         status = await rec.test_login_status()
         print(f"   Login status: {status}")
+        print(f"   Current status: {rec.get_status()}")
         
         # ログインセットアップ（必要時のみ）
         if status == "none":
-            print("2. Starting login setup...")
+            print("\n2. Starting login setup...")
             result = await rec.setup_login()
             print(f"   Login result: {result}")
+            print(f"   After login status: {rec.get_status()}")
         
-        # テスト録画
-        print("3. Test recording...")
+        # テスト録画（meta引数も渡してみる）
+        print("\n3. Test recording with meta...")
+        test_meta = {"test": "data", "timestamp": "2025-09-07"}
         result = await rec.test_record("https://twitcasting.tv/test")
         print(f"   Recording result: {result.get('success')}")
+        print(f"   After recording status: {rec.get_status()}")
+        
+        # meta付き録画テスト
+        print("\n4. Recording with meta parameter...")
+        result2 = await rec.record("https://twitcasting.tv/test", duration=5, meta=test_meta)
+        print(f"   Recording with meta result: {result2.get('success')}")
         
         # クリーンアップ
         await rec.close(keep_chrome=False)
-        print("=== Test Complete ===")
+        print("\n=== Test Complete ===")
         
     asyncio.run(test())
