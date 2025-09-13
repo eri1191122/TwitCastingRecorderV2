@@ -1,0 +1,4504 @@
+﻿フォルダー パスの一覧:  ボリューム OS
+ボリューム シリアル番号は 62A0-0938 です
+C:.
+│  .gitignore
+│  config.json
+│  do_login.py
+│  facade.py
+│  folder_tree.txt
+│  monitor_gui.py
+│  README.md
+│  requirements.txt
+│  tc_recorder_core.py
+│  tc_recorder_gui.py
+│  test_all_in_one.py
+│  次やるべきこと.txt
+│  
+├─.auth
+│  └─playwright
+│      │  first_party_sets.db
+│      │  first_party_sets.db-journal
+│      │  Last Browser
+│      │  Last Version
+│      │  Local State
+│      │  Variations
+│      │  
+│      ├─component_crx_cache
+│      │      metadata.json
+│      │      
+│      ├─Crashpad
+│      │  │  settings.dat
+│      │  │  
+│      │  ├─attachments
+│      │  └─reports
+│      ├─Default
+│      │  │  Account Web Data
+│      │  │  Account Web Data-journal
+│      │  │  Affiliation Database
+│      │  │  Affiliation Database-journal
+│      │  │  BookmarkMergedSurfaceOrdering
+│      │  │  BrowsingTopicsSiteData
+│      │  │  BrowsingTopicsSiteData-journal
+│      │  │  BrowsingTopicsState
+│      │  │  chrome_debug.log
+│      │  │  DIPS
+│      │  │  DIPS-wal
+│      │  │  Favicons
+│      │  │  Favicons-journal
+│      │  │  heavy_ad_intervention_opt_out.db
+│      │  │  heavy_ad_intervention_opt_out.db-journal
+│      │  │  History
+│      │  │  History-journal
+│      │  │  Login Data
+│      │  │  Login Data For Account
+│      │  │  Login Data For Account-journal
+│      │  │  Login Data-journal
+│      │  │  Network Action Predictor
+│      │  │  Network Action Predictor-journal
+│      │  │  Preferences
+│      │  │  PreferredApps
+│      │  │  README
+│      │  │  Secure Preferences
+│      │  │  ServerCertificate
+│      │  │  ServerCertificate-journal
+│      │  │  SharedStorage
+│      │  │  SharedStorage-wal
+│      │  │  Shortcuts
+│      │  │  Shortcuts-journal
+│      │  │  Top Sites
+│      │  │  Top Sites-journal
+│      │  │  trusted_vault.pb
+│      │  │  Web Data
+│      │  │  Web Data-journal
+│      │  │  
+│      │  ├─AutofillStrikeDatabase
+│      │  │      LOCK
+│      │  │      LOG
+│      │  │      LOG.old
+│      │  │      
+│      │  ├─blob_storage
+│      │  │  └─6c157634-6189-44ff-aa23-1c62f591b5b5
+│      │  ├─BudgetDatabase
+│      │  │      LOCK
+│      │  │      LOG
+│      │  │      LOG.old
+│      │  │      
+│      │  ├─Cache
+│      │  │  └─Cache_Data
+│      │  │          data_0
+│      │  │          data_1
+│      │  │          data_2
+│      │  │          data_3
+│      │  │          f_000003
+│      │  │          f_000004
+│      │  │          f_000005
+│      │  │          f_000006
+│      │  │          f_000007
+│      │  │          f_000008
+│      │  │          f_00000a
+│      │  │          f_00000c
+│      │  │          f_00000e
+│      │  │          f_000011
+│      │  │          f_000012
+│      │  │          f_000013
+│      │  │          f_000014
+│      │  │          f_000015
+│      │  │          f_000016
+│      │  │          f_000017
+│      │  │          f_000018
+│      │  │          f_000019
+│      │  │          f_00001a
+│      │  │          f_00001b
+│      │  │          f_00001d
+│      │  │          f_00001e
+│      │  │          f_000021
+│      │  │          f_000023
+│      │  │          f_00002b
+│      │  │          f_00002c
+│      │  │          f_00002d
+│      │  │          f_00002e
+│      │  │          f_00002f
+│      │  │          f_000030
+│      │  │          f_000031
+│      │  │          f_000032
+│      │  │          f_000033
+│      │  │          f_000034
+│      │  │          f_000035
+│      │  │          f_000036
+│      │  │          f_000037
+│      │  │          f_000039
+│      │  │          f_00003a
+│      │  │          f_00003b
+│      │  │          f_00003d
+│      │  │          f_00003e
+│      │  │          f_00003f
+│      │  │          f_000041
+│      │  │          f_000042
+│      │  │          f_000043
+│      │  │          f_000045
+│      │  │          f_000049
+│      │  │          f_00004a
+│      │  │          f_00004b
+│      │  │          f_00004c
+│      │  │          f_000050
+│      │  │          f_000054
+│      │  │          f_000055
+│      │  │          f_000056
+│      │  │          f_000057
+│      │  │          f_000059
+│      │  │          f_00005b
+│      │  │          f_00005c
+│      │  │          f_00005d
+│      │  │          f_00005e
+│      │  │          f_00005f
+│      │  │          f_000060
+│      │  │          f_000061
+│      │  │          f_000062
+│      │  │          f_000063
+│      │  │          f_000064
+│      │  │          f_000065
+│      │  │          f_000066
+│      │  │          f_000067
+│      │  │          f_000068
+│      │  │          f_00006a
+│      │  │          f_00006b
+│      │  │          f_00006c
+│      │  │          f_00006d
+│      │  │          f_00006e
+│      │  │          f_00006f
+│      │  │          f_000071
+│      │  │          f_000072
+│      │  │          f_000073
+│      │  │          f_000075
+│      │  │          f_000076
+│      │  │          f_000077
+│      │  │          f_000078
+│      │  │          f_000079
+│      │  │          f_00007a
+│      │  │          f_00007c
+│      │  │          f_00007d
+│      │  │          f_00007e
+│      │  │          f_00007f
+│      │  │          f_000080
+│      │  │          f_000081
+│      │  │          f_000082
+│      │  │          f_000083
+│      │  │          f_000084
+│      │  │          f_000085
+│      │  │          f_000086
+│      │  │          f_000087
+│      │  │          f_000088
+│      │  │          f_000089
+│      │  │          f_00008a
+│      │  │          f_00008b
+│      │  │          f_00008c
+│      │  │          f_00008d
+│      │  │          f_00008e
+│      │  │          f_00008f
+│      │  │          f_000090
+│      │  │          f_000091
+│      │  │          f_000092
+│      │  │          f_000093
+│      │  │          f_000094
+│      │  │          f_000095
+│      │  │          f_000096
+│      │  │          f_000097
+│      │  │          f_000098
+│      │  │          f_000099
+│      │  │          f_00009b
+│      │  │          f_00009c
+│      │  │          f_00009d
+│      │  │          f_00009e
+│      │  │          f_00009f
+│      │  │          f_0000a1
+│      │  │          f_0000a3
+│      │  │          f_0000a4
+│      │  │          f_0000a5
+│      │  │          f_0000a6
+│      │  │          f_0000a7
+│      │  │          f_0000a8
+│      │  │          f_0000aa
+│      │  │          f_0000ab
+│      │  │          f_0000ac
+│      │  │          f_0000ad
+│      │  │          f_0000af
+│      │  │          f_0000b0
+│      │  │          f_0000b3
+│      │  │          f_0000b5
+│      │  │          f_0000b6
+│      │  │          f_0000b7
+│      │  │          f_0000b8
+│      │  │          f_0000b9
+│      │  │          f_0000ba
+│      │  │          f_0000bb
+│      │  │          f_0000bc
+│      │  │          f_0000be
+│      │  │          f_0000bf
+│      │  │          f_0000c0
+│      │  │          f_0000c1
+│      │  │          f_0000c2
+│      │  │          f_0000c3
+│      │  │          f_0000c4
+│      │  │          f_0000c5
+│      │  │          f_0000c6
+│      │  │          f_0000c7
+│      │  │          f_0000c8
+│      │  │          f_0000c9
+│      │  │          f_0000cb
+│      │  │          f_0000cc
+│      │  │          f_0000cd
+│      │  │          f_0000ce
+│      │  │          f_0000cf
+│      │  │          f_0000d2
+│      │  │          f_0000d5
+│      │  │          f_0000d7
+│      │  │          f_0000d8
+│      │  │          f_0000d9
+│      │  │          f_0000db
+│      │  │          f_0000dc
+│      │  │          f_0000dd
+│      │  │          f_0000de
+│      │  │          f_0000df
+│      │  │          f_0000e0
+│      │  │          f_0000e2
+│      │  │          f_0000e3
+│      │  │          f_0000e4
+│      │  │          f_0000e5
+│      │  │          f_0000e7
+│      │  │          f_0000e8
+│      │  │          f_0000ea
+│      │  │          f_0000ec
+│      │  │          f_0000ed
+│      │  │          f_0000ee
+│      │  │          f_0000ef
+│      │  │          f_0000f5
+│      │  │          f_0000f6
+│      │  │          f_0000f7
+│      │  │          f_0000f8
+│      │  │          f_0000fa
+│      │  │          f_0000fb
+│      │  │          f_0000fc
+│      │  │          f_0000fd
+│      │  │          f_0000fe
+│      │  │          f_0000ff
+│      │  │          f_000100
+│      │  │          f_000102
+│      │  │          f_000104
+│      │  │          f_000106
+│      │  │          f_000109
+│      │  │          f_00010c
+│      │  │          f_00010d
+│      │  │          f_00010e
+│      │  │          f_00010f
+│      │  │          f_000113
+│      │  │          f_000114
+│      │  │          f_000115
+│      │  │          f_000116
+│      │  │          f_000118
+│      │  │          f_000119
+│      │  │          f_00011b
+│      │  │          f_00011c
+│      │  │          f_00011e
+│      │  │          f_000121
+│      │  │          f_000122
+│      │  │          f_000125
+│      │  │          f_000126
+│      │  │          f_000127
+│      │  │          f_000128
+│      │  │          f_000129
+│      │  │          f_00012a
+│      │  │          f_00012b
+│      │  │          f_00012d
+│      │  │          f_00012f
+│      │  │          f_000131
+│      │  │          f_000132
+│      │  │          f_000133
+│      │  │          f_000134
+│      │  │          f_000135
+│      │  │          f_000137
+│      │  │          f_000139
+│      │  │          f_00013c
+│      │  │          f_00013d
+│      │  │          f_00013e
+│      │  │          f_00013f
+│      │  │          f_000141
+│      │  │          f_000142
+│      │  │          f_000143
+│      │  │          f_000144
+│      │  │          f_000145
+│      │  │          f_000146
+│      │  │          f_000147
+│      │  │          f_00014c
+│      │  │          f_00014d
+│      │  │          f_00014e
+│      │  │          f_00014f
+│      │  │          f_000150
+│      │  │          f_000152
+│      │  │          f_000156
+│      │  │          f_000157
+│      │  │          f_000159
+│      │  │          f_00015a
+│      │  │          f_00015b
+│      │  │          f_000160
+│      │  │          f_000161
+│      │  │          f_000162
+│      │  │          f_000163
+│      │  │          f_000164
+│      │  │          f_000167
+│      │  │          f_000168
+│      │  │          f_00016a
+│      │  │          f_00016b
+│      │  │          f_00016c
+│      │  │          f_00016d
+│      │  │          f_00016e
+│      │  │          f_00016f
+│      │  │          f_000170
+│      │  │          f_000174
+│      │  │          f_000176
+│      │  │          f_000177
+│      │  │          f_000178
+│      │  │          f_000179
+│      │  │          f_00017a
+│      │  │          f_00017c
+│      │  │          f_00017e
+│      │  │          f_00017f
+│      │  │          f_000182
+│      │  │          f_000183
+│      │  │          f_000184
+│      │  │          f_000186
+│      │  │          f_000187
+│      │  │          f_000188
+│      │  │          f_000189
+│      │  │          f_00018a
+│      │  │          f_00018c
+│      │  │          f_00018d
+│      │  │          f_00018e
+│      │  │          f_00018f
+│      │  │          f_000190
+│      │  │          f_000192
+│      │  │          f_000193
+│      │  │          f_000194
+│      │  │          f_000196
+│      │  │          f_000197
+│      │  │          f_000199
+│      │  │          f_00019a
+│      │  │          f_00019b
+│      │  │          f_00019c
+│      │  │          f_00019d
+│      │  │          f_00019f
+│      │  │          f_0001a1
+│      │  │          f_0001a2
+│      │  │          f_0001a3
+│      │  │          f_0001a4
+│      │  │          f_0001a5
+│      │  │          f_0001a6
+│      │  │          f_0001a7
+│      │  │          f_0001a8
+│      │  │          f_0001a9
+│      │  │          f_0001aa
+│      │  │          f_0001ad
+│      │  │          f_0001ae
+│      │  │          f_0001af
+│      │  │          f_0001b0
+│      │  │          f_0001b2
+│      │  │          f_0001b3
+│      │  │          f_0001b4
+│      │  │          f_0001b5
+│      │  │          f_0001b6
+│      │  │          f_0001b7
+│      │  │          f_0001b8
+│      │  │          f_0001b9
+│      │  │          f_0001ba
+│      │  │          f_0001bb
+│      │  │          f_0001bc
+│      │  │          f_0001bd
+│      │  │          f_0001be
+│      │  │          f_0001bf
+│      │  │          f_0001c0
+│      │  │          f_0001c1
+│      │  │          f_0001c2
+│      │  │          f_0001c3
+│      │  │          f_0001c4
+│      │  │          f_0001c5
+│      │  │          f_0001c6
+│      │  │          f_0001c7
+│      │  │          f_0001c8
+│      │  │          f_0001c9
+│      │  │          f_0001ca
+│      │  │          f_0001cb
+│      │  │          f_0001cc
+│      │  │          f_0001d0
+│      │  │          f_0001d3
+│      │  │          f_0001d8
+│      │  │          f_0001db
+│      │  │          f_0001e0
+│      │  │          f_0001e1
+│      │  │          f_0001e2
+│      │  │          f_0001e4
+│      │  │          f_0001e5
+│      │  │          f_0001e6
+│      │  │          f_0001e7
+│      │  │          f_0001e9
+│      │  │          f_0001ea
+│      │  │          f_0001ed
+│      │  │          f_0001ef
+│      │  │          f_0001f0
+│      │  │          f_0001f2
+│      │  │          f_0001f3
+│      │  │          f_0001f4
+│      │  │          f_0001f5
+│      │  │          f_0001f6
+│      │  │          f_0001f7
+│      │  │          f_0001f8
+│      │  │          f_0001f9
+│      │  │          f_0001fa
+│      │  │          f_0001fb
+│      │  │          f_0001fc
+│      │  │          f_0001fd
+│      │  │          f_0001fe
+│      │  │          f_000200
+│      │  │          f_000202
+│      │  │          f_000203
+│      │  │          f_000204
+│      │  │          f_000205
+│      │  │          f_000206
+│      │  │          f_000207
+│      │  │          f_000208
+│      │  │          f_000209
+│      │  │          f_00020a
+│      │  │          f_00020b
+│      │  │          f_00020c
+│      │  │          f_00020d
+│      │  │          f_00020e
+│      │  │          f_000210
+│      │  │          f_000211
+│      │  │          f_000212
+│      │  │          f_000214
+│      │  │          f_000215
+│      │  │          f_000216
+│      │  │          f_000217
+│      │  │          f_000218
+│      │  │          f_000219
+│      │  │          f_00021a
+│      │  │          f_00021c
+│      │  │          f_00021d
+│      │  │          f_00021e
+│      │  │          f_00021f
+│      │  │          f_000220
+│      │  │          f_000221
+│      │  │          f_000222
+│      │  │          f_000223
+│      │  │          f_000224
+│      │  │          f_000225
+│      │  │          f_000226
+│      │  │          f_000227
+│      │  │          f_000228
+│      │  │          f_000229
+│      │  │          f_00022a
+│      │  │          f_00022b
+│      │  │          f_00022c
+│      │  │          f_00022d
+│      │  │          f_00022e
+│      │  │          f_00022f
+│      │  │          f_000230
+│      │  │          f_000231
+│      │  │          f_000232
+│      │  │          f_000233
+│      │  │          f_000234
+│      │  │          f_000235
+│      │  │          f_000236
+│      │  │          f_000237
+│      │  │          f_000238
+│      │  │          f_000239
+│      │  │          f_00023a
+│      │  │          f_00023b
+│      │  │          f_00023c
+│      │  │          f_00023d
+│      │  │          f_00023e
+│      │  │          f_00023f
+│      │  │          f_000240
+│      │  │          f_000242
+│      │  │          f_000243
+│      │  │          f_000244
+│      │  │          f_000245
+│      │  │          f_000246
+│      │  │          f_000247
+│      │  │          f_000248
+│      │  │          f_000249
+│      │  │          f_00024b
+│      │  │          f_00024c
+│      │  │          f_00024e
+│      │  │          f_00024f
+│      │  │          f_000250
+│      │  │          f_000251
+│      │  │          f_000252
+│      │  │          f_000253
+│      │  │          f_000254
+│      │  │          f_000255
+│      │  │          f_000256
+│      │  │          f_000257
+│      │  │          index
+│      │  │          
+│      │  ├─chrome_cart_db
+│      │  │      LOCK
+│      │  │      LOG
+│      │  │      LOG.old
+│      │  │      
+│      │  ├─ClientCertificates
+│      │  │      LOCK
+│      │  │      LOG
+│      │  │      LOG.old
+│      │  │      
+│      │  ├─Code Cache
+│      │  │  ├─js
+│      │  │  │  │  02a5d4bc9e45dc6c_0
+│      │  │  │  │  02b5d92842cb25b7_0
+│      │  │  │  │  02fadd70c07920fd_0
+│      │  │  │  │  043638a2cdc95666_0
+│      │  │  │  │  0506ab3bedd285e8_0
+│      │  │  │  │  0598fc680e178f21_0
+│      │  │  │  │  07d95d4357da1c66_0
+│      │  │  │  │  0809aa49ca795332_0
+│      │  │  │  │  08cecf80e32fe224_0
+│      │  │  │  │  09b01f4a7ac1d0e8_0
+│      │  │  │  │  0da871b1ed06a030_0
+│      │  │  │  │  0dd31a27243b72b4_0
+│      │  │  │  │  0f6f90791ea364f2_0
+│      │  │  │  │  1074f14c3d90f0e1_0
+│      │  │  │  │  11afa7fa6ad3b3bf_0
+│      │  │  │  │  12885b9218ac6a92_0
+│      │  │  │  │  134b6ebcb0f8f647_0
+│      │  │  │  │  1473bcdba3201e5b_0
+│      │  │  │  │  199de888c67200d6_0
+│      │  │  │  │  19b9f8e464112c12_0
+│      │  │  │  │  1a0cf3fbc886f910_0
+│      │  │  │  │  1b04da3c95b05741_0
+│      │  │  │  │  1b9674df8d663c72_0
+│      │  │  │  │  1cb497da686f5030_0
+│      │  │  │  │  1e4a51373a415ee5_0
+│      │  │  │  │  1ef434d687f33d95_0
+│      │  │  │  │  1f81f01a78eadf52_0
+│      │  │  │  │  1ff8f728ae7a15f9_0
+│      │  │  │  │  208b2d5a2cf363aa_0
+│      │  │  │  │  20d5ec77201d7af0_0
+│      │  │  │  │  21a287a0837a224b_0
+│      │  │  │  │  239d4819834ddbd3_0
+│      │  │  │  │  2425d02b8d2401ba_0
+│      │  │  │  │  25150fa60842e7fb_0
+│      │  │  │  │  255512b644172d8a_0
+│      │  │  │  │  25dfd87b18ff7797_0
+│      │  │  │  │  261caf3ae27cc757_0
+│      │  │  │  │  273577471b7c53aa_0
+│      │  │  │  │  28fde7491c16d9ff_0
+│      │  │  │  │  29b164427f44c889_0
+│      │  │  │  │  29b2f14ee21923fb_0
+│      │  │  │  │  2a1f112276c080f1_0
+│      │  │  │  │  2b4ae46ed3eca9fb_0
+│      │  │  │  │  2c1927930e8fa436_0
+│      │  │  │  │  2cce58cde5f26df0_0
+│      │  │  │  │  2d0685cbb25a802f_0
+│      │  │  │  │  2df71a928d68f3ff_0
+│      │  │  │  │  31839eb9a72dac56_0
+│      │  │  │  │  357a46fc100e0e20_0
+│      │  │  │  │  35c27a8c37320773_0
+│      │  │  │  │  3972800383a30a0e_0
+│      │  │  │  │  3aeeb8e4f05c0b81_0
+│      │  │  │  │  3d104a6018be984f_0
+│      │  │  │  │  3e3ff65c7ed90eca_0
+│      │  │  │  │  3e583d552064c6f1_0
+│      │  │  │  │  3e97dfd32c4d4f13_0
+│      │  │  │  │  419a298209d55732_0
+│      │  │  │  │  41fc4c9bfd14953b_0
+│      │  │  │  │  4292c9adbee4c4b7_0
+│      │  │  │  │  43b0c9fb01b32131_0
+│      │  │  │  │  45d07f60541dd669_0
+│      │  │  │  │  48c6923f1573b5ab_0
+│      │  │  │  │  493e0abad105c481_0
+│      │  │  │  │  4a4f236604b911ce_0
+│      │  │  │  │  4c7493fb5777d40b_0
+│      │  │  │  │  4d1f64d27ad4bbb8_0
+│      │  │  │  │  4d276b0f259b8195_0
+│      │  │  │  │  4f8731a02fdd10ef_0
+│      │  │  │  │  4f898e7ad0fa1596_0
+│      │  │  │  │  500d593a1e4a9ce7_0
+│      │  │  │  │  50332b152ad9369b_0
+│      │  │  │  │  504a829a4989f234_0
+│      │  │  │  │  50a036cb3c95c082_0
+│      │  │  │  │  514bb7a8675401bb_0
+│      │  │  │  │  52541d8c29659fc0_0
+│      │  │  │  │  53682e32f5cef00a_0
+│      │  │  │  │  544f2631ac258be0_0
+│      │  │  │  │  54c9ba2ac666e7fc_0
+│      │  │  │  │  555dd490923392f6_0
+│      │  │  │  │  56ea1412841a876a_0
+│      │  │  │  │  5800be2a7256fce7_0
+│      │  │  │  │  588354a0153680fb_0
+│      │  │  │  │  58dcbe5f89c540df_0
+│      │  │  │  │  5a30a8ad47cd0892_0
+│      │  │  │  │  5afa334f050e33bf_0
+│      │  │  │  │  5c31b71b8ea82551_0
+│      │  │  │  │  5d17d42b845c1417_0
+│      │  │  │  │  5db8c2197fd61254_0
+│      │  │  │  │  5e1efea6dd4e710a_0
+│      │  │  │  │  5fe02fbb28103454_0
+│      │  │  │  │  63de592f982e2f46_0
+│      │  │  │  │  6424e05f554e9bbb_0
+│      │  │  │  │  67f9ca3f6df317bb_0
+│      │  │  │  │  6885f6efe1710ec9_0
+│      │  │  │  │  6889aae53c582d22_0
+│      │  │  │  │  6b353095217c00af_0
+│      │  │  │  │  6b5bde590fadcaf4_0
+│      │  │  │  │  6f4d1325a8a33ea0_0
+│      │  │  │  │  6fdd695aafb07777_0
+│      │  │  │  │  708db0433af5a274_0
+│      │  │  │  │  71055dce63a86ed4_0
+│      │  │  │  │  73de95c62ab5a708_0
+│      │  │  │  │  743d0a3747e46ba5_0
+│      │  │  │  │  74f1576ea469a3a1_0
+│      │  │  │  │  7598dca2ae074682_0
+│      │  │  │  │  761ff525df99f2a3_0
+│      │  │  │  │  767851a3e91ed265_0
+│      │  │  │  │  773838b67b295014_0
+│      │  │  │  │  78ebd1906ff4e5ad_0
+│      │  │  │  │  794222a70fb50c5d_0
+│      │  │  │  │  7a0a475d1ff882a4_0
+│      │  │  │  │  7b23ee14b9f1a808_0
+│      │  │  │  │  7c46c2d170ce21bb_0
+│      │  │  │  │  7d885d5c017913fb_0
+│      │  │  │  │  7f919cbf3c70f618_0
+│      │  │  │  │  80d79dffa2c0b275_0
+│      │  │  │  │  817a506b42ce3548_0
+│      │  │  │  │  822c24f227ea41f0_0
+│      │  │  │  │  82a67fa41d86d751_0
+│      │  │  │  │  83fa0f011b929328_0
+│      │  │  │  │  84989c5019868649_0
+│      │  │  │  │  857c42c3c4dee4f9_0
+│      │  │  │  │  86648073e9b80a48_0
+│      │  │  │  │  88f508426dc9d196_0
+│      │  │  │  │  89534b0f9eb0d6e5_0
+│      │  │  │  │  8adc8e66e579fa1b_0
+│      │  │  │  │  8b083e0f1603bc1f_0
+│      │  │  │  │  8c144b04d3b0506c_0
+│      │  │  │  │  8c5cf12fac08f271_0
+│      │  │  │  │  8cecd1f75c6a1bc6_0
+│      │  │  │  │  8da159eeb257224e_0
+│      │  │  │  │  8dc2ea7571df62ae_0
+│      │  │  │  │  8f7b0c05bc0359ab_0
+│      │  │  │  │  8f7f410137bb3575_0
+│      │  │  │  │  90f6ec2cc2a79e66_0
+│      │  │  │  │  93b53238ce7b42ce_0
+│      │  │  │  │  94e3c5f2251045b4_0
+│      │  │  │  │  95b5a4d08e87576c_0
+│      │  │  │  │  96214fbd64657244_0
+│      │  │  │  │  96688ed814fc9c25_0
+│      │  │  │  │  9912dc9cdc830e74_0
+│      │  │  │  │  9c44d37978a19dbc_0
+│      │  │  │  │  9cb5551db65786ea_0
+│      │  │  │  │  9dab769f864930c2_0
+│      │  │  │  │  9edb7c5fffe86ab1_0
+│      │  │  │  │  a1170bbc551645a9_0
+│      │  │  │  │  a221adbed8681725_0
+│      │  │  │  │  a362e50eac729b05_0
+│      │  │  │  │  a39f5d9509c41f1c_0
+│      │  │  │  │  a3ce641c26a4c911_0
+│      │  │  │  │  a4d092d2d98b3535_0
+│      │  │  │  │  a51a720c96921382_0
+│      │  │  │  │  a586195be84f0ae3_0
+│      │  │  │  │  a5e3d857ff362a2b_0
+│      │  │  │  │  a6a2559c21424807_0
+│      │  │  │  │  a6bdd7c10598a522_0
+│      │  │  │  │  aa535a714a813711_0
+│      │  │  │  │  ab39cae31524e613_0
+│      │  │  │  │  abb6b141383ae9ee_0
+│      │  │  │  │  abc8885b7cecbcd0_0
+│      │  │  │  │  ac18781f40fc6d98_0
+│      │  │  │  │  ad1d19cb51541577_0
+│      │  │  │  │  ae066607f85c6307_0
+│      │  │  │  │  ae3f0cb7e6259ca8_0
+│      │  │  │  │  ae4682062c6bcb9f_0
+│      │  │  │  │  af51f1c69379d75e_0
+│      │  │  │  │  b10e3a9261c755a4_0
+│      │  │  │  │  b1996696dbcaca30_0
+│      │  │  │  │  b2298e59d4476991_0
+│      │  │  │  │  b2ff0fe442aa2fa8_0
+│      │  │  │  │  b3e0c73aec94de3d_0
+│      │  │  │  │  b4d066e7c85c52a3_0
+│      │  │  │  │  b4fe2da462abe858_0
+│      │  │  │  │  b540935338380810_0
+│      │  │  │  │  b77a32abced31ed2_0
+│      │  │  │  │  b9d36105081a780b_0
+│      │  │  │  │  bbfca88fd5650431_0
+│      │  │  │  │  bc5662eec16d3c04_0
+│      │  │  │  │  bf3ec1cdf55abbe1_0
+│      │  │  │  │  bfe2467a0a4c2797_0
+│      │  │  │  │  c03d6240e515ce16_0
+│      │  │  │  │  c51ccca2fb9c2ba4_0
+│      │  │  │  │  c6954d90ceb99450_0
+│      │  │  │  │  c75f96ab57032a69_0
+│      │  │  │  │  c77fe91377545c79_0
+│      │  │  │  │  c79d7a69608090e4_0
+│      │  │  │  │  c7cfeb262c7dff0a_0
+│      │  │  │  │  c8bd2492d81f306b_0
+│      │  │  │  │  c9c3162d8cb5ddd2_0
+│      │  │  │  │  ca5e9bbe5692e95d_0
+│      │  │  │  │  cbf3ad8cf337f814_0
+│      │  │  │  │  cc010ad012789e6d_0
+│      │  │  │  │  cdca7e1396f57bae_0
+│      │  │  │  │  cdd95602379bc05e_0
+│      │  │  │  │  d07fef61909624b4_0
+│      │  │  │  │  d256a9982b5e0e86_0
+│      │  │  │  │  d34f969a846eac87_0
+│      │  │  │  │  d3b146b76342d870_0
+│      │  │  │  │  d3b715093e14a430_0
+│      │  │  │  │  d3d8c3991be0316f_0
+│      │  │  │  │  d4cbcc47d1f4aeb4_0
+│      │  │  │  │  d56b9dec43d731ed_0
+│      │  │  │  │  d7646d0d8abd9676_0
+│      │  │  │  │  d79952dd2822b976_0
+│      │  │  │  │  d8816d4312af2329_0
+│      │  │  │  │  d89f4649174b0335_0
+│      │  │  │  │  db9c316ee0f6c239_0
+│      │  │  │  │  de140167df72cf80_0
+│      │  │  │  │  e0171e86f2e8747d_0
+│      │  │  │  │  e02e3ee7da1c7337_0
+│      │  │  │  │  e2746abddcbf4f16_0
+│      │  │  │  │  e2968d34ec4d8e91_0
+│      │  │  │  │  e33a2a431f45904d_0
+│      │  │  │  │  e3a117244b6c0344_0
+│      │  │  │  │  e3cb7ca7b07d17ff_0
+│      │  │  │  │  e691a00b8f4f6d6f_0
+│      │  │  │  │  e7198369a38a2d56_0
+│      │  │  │  │  e850532c44564cb1_0
+│      │  │  │  │  ea036ede60bc0398_0
+│      │  │  │  │  eb65c1d48c3fd947_0
+│      │  │  │  │  ebc30ed5d5a962bf_0
+│      │  │  │  │  ed814f128eb84cea_0
+│      │  │  │  │  ee255db0bc23571c_0
+│      │  │  │  │  ee7ff8ee10856e23_0
+│      │  │  │  │  eedf2fdace0ae3e5_0
+│      │  │  │  │  ef10ecb42c53ec41_0
+│      │  │  │  │  f030cdd95731ebe7_0
+│      │  │  │  │  f197cbea60058ec5_0
+│      │  │  │  │  f1f010677cb0ff10_0
+│      │  │  │  │  f21768d681ff2cbd_0
+│      │  │  │  │  f4d7cb3030d77788_0
+│      │  │  │  │  f52f7c5453a32e3c_0
+│      │  │  │  │  f6a79b595916e625_0
+│      │  │  │  │  f6e1faf1cbad934c_0
+│      │  │  │  │  faeddb65160a961e_0
+│      │  │  │  │  faf5ed4dec7007d5_0
+│      │  │  │  │  fb6bc1c143429520_0
+│      │  │  │  │  fd1de41e07d2d32d_0
+│      │  │  │  │  fdb309e8e1275fed_0
+│      │  │  │  │  fe84efb1ae70341d_0
+│      │  │  │  │  index
+│      │  │  │  │  
+│      │  │  │  └─index-dir
+│      │  │  │          the-real-index
+│      │  │  │          
+│      │  │  └─wasm
+│      │  │      │  index
+│      │  │      │  
+│      │  │      └─index-dir
+│      │  │              the-real-index
+│      │  │              
+│      │  ├─commerce_subscription_db
+│      │  │      LOCK
+│      │  │      LOG
+│      │  │      LOG.old
+│      │  │      
+│      │  ├─DawnGraphiteCache
+│      │  │      data_0
+│      │  │      data_1
+│      │  │      data_2
+│      │  │      data_3
+│      │  │      index
+│      │  │      
+│      │  ├─DawnWebGPUCache
+│      │  │      data_0
+│      │  │      data_1
+│      │  │      data_2
+│      │  │      data_3
+│      │  │      index
+│      │  │      
+│      │  ├─discounts_db
+│      │  │      LOCK
+│      │  │      LOG
+│      │  │      LOG.old
+│      │  │      
+│      │  ├─discount_infos_db
+│      │  │      LOCK
+│      │  │      LOG
+│      │  │      LOG.old
+│      │  │      
+│      │  ├─Download Service
+│      │  │  ├─EntryDB
+│      │  │  │      LOCK
+│      │  │  │      LOG
+│      │  │  │      
+│      │  │  └─Files
+│      │  ├─Extension Rules
+│      │  │      000003.log
+│      │  │      CURRENT
+│      │  │      LOCK
+│      │  │      LOG
+│      │  │      MANIFEST-000001
+│      │  │      
+│      │  ├─Extension Scripts
+│      │  │      000003.log
+│      │  │      CURRENT
+│      │  │      LOCK
+│      │  │      LOG
+│      │  │      MANIFEST-000001
+│      │  │      
+│      │  ├─Extension State
+│      │  │      000003.log
+│      │  │      CURRENT
+│      │  │      LOCK
+│      │  │      LOG
+│      │  │      LOG.old
+│      │  │      MANIFEST-000001
+│      │  │      
+│      │  ├─Feature Engagement Tracker
+│      │  │  ├─AvailabilityDB
+│      │  │  │      LOCK
+│      │  │  │      LOG
+│      │  │  │      LOG.old
+│      │  │  │      
+│      │  │  └─EventDB
+│      │  │          LOCK
+│      │  │          LOG
+│      │  │          LOG.old
+│      │  │          
+│      │  ├─GCM Store
+│      │  │      000003.log
+│      │  │      CURRENT
+│      │  │      LOCK
+│      │  │      LOG
+│      │  │      LOG.old
+│      │  │      MANIFEST-000001
+│      │  │      
+│      │  ├─GPUCache
+│      │  │      data_0
+│      │  │      data_1
+│      │  │      data_2
+│      │  │      data_3
+│      │  │      index
+│      │  │      
+│      │  ├─Local Storage
+│      │  │  └─leveldb
+│      │  │          000003.log
+│      │  │          CURRENT
+│      │  │          LOCK
+│      │  │          LOG
+│      │  │          LOG.old
+│      │  │          MANIFEST-000001
+│      │  │          
+│      │  ├─Network
+│      │  │      Cookies
+│      │  │      Cookies-journal
+│      │  │      Network Persistent State
+│      │  │      NetworkDataMigrated
+│      │  │      Reporting and NEL
+│      │  │      Reporting and NEL-journal
+│      │  │      SCT Auditing Pending Reports
+│      │  │      TransportSecurity
+│      │  │      Trust Tokens
+│      │  │      Trust Tokens-journal
+│      │  │      
+│      │  ├─parcel_tracking_db
+│      │  │      LOCK
+│      │  │      LOG
+│      │  │      LOG.old
+│      │  │      
+│      │  ├─PersistentOriginTrials
+│      │  │      LOCK
+│      │  │      LOG
+│      │  │      LOG.old
+│      │  │      
+│      │  ├─Safe Browsing Network
+│      │  │      NetworkDataMigrated
+│      │  │      Safe Browsing Cookies
+│      │  │      Safe Browsing Cookies-journal
+│      │  │      
+│      │  ├─Segmentation Platform
+│      │  │  ├─SegmentInfoDB
+│      │  │  │      LOCK
+│      │  │  │      LOG
+│      │  │  │      LOG.old
+│      │  │  │      
+│      │  │  ├─SignalDB
+│      │  │  │      LOCK
+│      │  │  │      LOG
+│      │  │  │      LOG.old
+│      │  │  │      
+│      │  │  └─SignalStorageConfigDB
+│      │  │          LOCK
+│      │  │          LOG
+│      │  │          LOG.old
+│      │  │          
+│      │  ├─Session Storage
+│      │  │      000003.log
+│      │  │      CURRENT
+│      │  │      LOCK
+│      │  │      LOG
+│      │  │      LOG.old
+│      │  │      MANIFEST-000001
+│      │  │      
+│      │  ├─Sessions
+│      │  │      Session_13401337447136293
+│      │  │      Session_13401337525785557
+│      │  │      Tabs_13401337447247579
+│      │  │      Tabs_13401337525902425
+│      │  │      
+│      │  ├─Shared Dictionary
+│      │  │  │  db
+│      │  │  │  db-journal
+│      │  │  │  
+│      │  │  └─cache
+│      │  │      │  index
+│      │  │      │  
+│      │  │      └─index-dir
+│      │  │              the-real-index
+│      │  │              
+│      │  ├─shared_proto_db
+│      │  │  │  000003.log
+│      │  │  │  CURRENT
+│      │  │  │  LOCK
+│      │  │  │  LOG
+│      │  │  │  LOG.old
+│      │  │  │  MANIFEST-000001
+│      │  │  │  
+│      │  │  └─metadata
+│      │  │          000003.log
+│      │  │          CURRENT
+│      │  │          LOCK
+│      │  │          LOG
+│      │  │          LOG.old
+│      │  │          MANIFEST-000001
+│      │  │          
+│      │  ├─Site Characteristics Database
+│      │  │      000003.log
+│      │  │      CURRENT
+│      │  │      LOCK
+│      │  │      LOG
+│      │  │      LOG.old
+│      │  │      MANIFEST-000001
+│      │  │      
+│      │  ├─Sync Data
+│      │  │  └─LevelDB
+│      │  │          000003.log
+│      │  │          CURRENT
+│      │  │          LOCK
+│      │  │          LOG
+│      │  │          LOG.old
+│      │  │          MANIFEST-000001
+│      │  │          
+│      │  └─WebStorage
+│      │          QuotaManager
+│      │          QuotaManager-journal
+│      │          
+│      ├─extensions_crx_cache
+│      │      metadata.json
+│      │      
+│      ├─GraphiteDawnCache
+│      │      data_0
+│      │      data_1
+│      │      data_2
+│      │      data_3
+│      │      index
+│      │      
+│      ├─GrShaderCache
+│      │      data_0
+│      │      data_1
+│      │      data_2
+│      │      data_3
+│      │      f_000001
+│      │      f_000002
+│      │      f_000003
+│      │      f_000004
+│      │      f_000005
+│      │      f_000006
+│      │      f_000007
+│      │      f_000008
+│      │      f_000009
+│      │      f_00000a
+│      │      f_00000b
+│      │      f_00000c
+│      │      f_00000d
+│      │      f_00000e
+│      │      f_00000f
+│      │      f_000010
+│      │      f_000011
+│      │      f_000012
+│      │      index
+│      │      
+│      ├─Safe Browsing
+│      ├─segmentation_platform
+│      │      ukm_db
+│      │      ukm_db-wal
+│      │      
+│      └─ShaderCache
+│              data_0
+│              data_1
+│              data_2
+│              data_3
+│              index
+│              
+├─auto
+│  │  job_queue.py
+│  │  live_detector.py
+│  │  monitor_cli.py
+│  │  monitor_engine.py
+│  │  recorder_wrapper.py
+│  │  targets.json
+│  │  targets.json.bak
+│  │  __init__.py
+│  │  
+│  └─__pycache__
+│          job_queue.cpython-310.pyc
+│          job_queue.cpython-313.pyc
+│          live_detector.cpython-310.pyc
+│          live_detector.cpython-313.pyc
+│          monitor_engine.cpython-310.pyc
+│          monitor_engine.cpython-313.pyc
+│          recorder_wrapper.cpython-310.pyc
+│          recorder_wrapper.cpython-313.pyc
+│          __init__.cpython-310.pyc
+│          __init__.cpython-313.pyc
+│          
+├─core
+│  │  chrome_singleton.py
+│  │  chrome_singleton.py.bak_20250828_200850
+│  │  __init__.py
+│  │  
+│  ├─.auth
+│  │  └─playwright
+│  │      │  first_party_sets.db
+│  │      │  first_party_sets.db-journal
+│  │      │  Last Browser
+│  │      │  Last Version
+│  │      │  Local State
+│  │      │  Variations
+│  │      │  
+│  │      ├─component_crx_cache
+│  │      │      metadata.json
+│  │      │      
+│  │      ├─Crashpad
+│  │      │  │  settings.dat
+│  │      │  │  
+│  │      │  ├─attachments
+│  │      │  └─reports
+│  │      ├─Default
+│  │      │  │  Account Web Data
+│  │      │  │  Account Web Data-journal
+│  │      │  │  Affiliation Database
+│  │      │  │  Affiliation Database-journal
+│  │      │  │  BookmarkMergedSurfaceOrdering
+│  │      │  │  BrowsingTopicsSiteData
+│  │      │  │  BrowsingTopicsSiteData-journal
+│  │      │  │  BrowsingTopicsState
+│  │      │  │  chrome_debug.log
+│  │      │  │  DIPS
+│  │      │  │  Favicons
+│  │      │  │  Favicons-journal
+│  │      │  │  heavy_ad_intervention_opt_out.db
+│  │      │  │  heavy_ad_intervention_opt_out.db-journal
+│  │      │  │  History
+│  │      │  │  History-journal
+│  │      │  │  LOCK
+│  │      │  │  LOG
+│  │      │  │  LOG.old
+│  │      │  │  Login Data
+│  │      │  │  Login Data For Account
+│  │      │  │  Login Data For Account-journal
+│  │      │  │  Login Data-journal
+│  │      │  │  Network Action Predictor
+│  │      │  │  Network Action Predictor-journal
+│  │      │  │  Preferences
+│  │      │  │  PreferredApps
+│  │      │  │  README
+│  │      │  │  Secure Preferences
+│  │      │  │  ServerCertificate
+│  │      │  │  ServerCertificate-journal
+│  │      │  │  SharedStorage
+│  │      │  │  Shortcuts
+│  │      │  │  Shortcuts-journal
+│  │      │  │  Top Sites
+│  │      │  │  Top Sites-journal
+│  │      │  │  trusted_vault.pb
+│  │      │  │  Web Data
+│  │      │  │  Web Data-journal
+│  │      │  │  
+│  │      │  ├─AutofillStrikeDatabase
+│  │      │  │      LOCK
+│  │      │  │      LOG
+│  │      │  │      LOG.old
+│  │      │  │      
+│  │      │  ├─blob_storage
+│  │      │  │  └─a489a9fc-49ae-4b74-9f1a-ee5abdb7ea2a
+│  │      │  ├─BudgetDatabase
+│  │      │  │      LOCK
+│  │      │  │      LOG
+│  │      │  │      LOG.old
+│  │      │  │      
+│  │      │  ├─Cache
+│  │      │  │  └─Cache_Data
+│  │      │  │          data_0
+│  │      │  │          data_1
+│  │      │  │          data_2
+│  │      │  │          data_3
+│  │      │  │          f_000002
+│  │      │  │          f_000003
+│  │      │  │          f_000004
+│  │      │  │          f_000005
+│  │      │  │          f_000006
+│  │      │  │          f_000007
+│  │      │  │          f_000008
+│  │      │  │          f_00000b
+│  │      │  │          f_00000c
+│  │      │  │          f_00000f
+│  │      │  │          f_000013
+│  │      │  │          f_000014
+│  │      │  │          f_000015
+│  │      │  │          f_000016
+│  │      │  │          f_000017
+│  │      │  │          f_000018
+│  │      │  │          f_000019
+│  │      │  │          f_00001a
+│  │      │  │          f_00001b
+│  │      │  │          f_00001c
+│  │      │  │          f_00001d
+│  │      │  │          f_00001e
+│  │      │  │          f_00001f
+│  │      │  │          f_000020
+│  │      │  │          f_000021
+│  │      │  │          f_000022
+│  │      │  │          f_000023
+│  │      │  │          f_000024
+│  │      │  │          f_000025
+│  │      │  │          f_000026
+│  │      │  │          f_000027
+│  │      │  │          f_000028
+│  │      │  │          f_000029
+│  │      │  │          f_00002a
+│  │      │  │          f_00002d
+│  │      │  │          f_00002e
+│  │      │  │          f_00002f
+│  │      │  │          f_000030
+│  │      │  │          f_000033
+│  │      │  │          f_000034
+│  │      │  │          f_000035
+│  │      │  │          f_000036
+│  │      │  │          f_000037
+│  │      │  │          f_000038
+│  │      │  │          f_000039
+│  │      │  │          f_00003a
+│  │      │  │          f_00003b
+│  │      │  │          f_00003c
+│  │      │  │          f_00003d
+│  │      │  │          f_00003e
+│  │      │  │          f_00003f
+│  │      │  │          f_000040
+│  │      │  │          f_000041
+│  │      │  │          f_000042
+│  │      │  │          f_000043
+│  │      │  │          f_000044
+│  │      │  │          f_000045
+│  │      │  │          f_000046
+│  │      │  │          f_000047
+│  │      │  │          f_000048
+│  │      │  │          f_000049
+│  │      │  │          f_00004a
+│  │      │  │          f_00004b
+│  │      │  │          f_00004c
+│  │      │  │          f_00004d
+│  │      │  │          f_00004e
+│  │      │  │          f_00004f
+│  │      │  │          f_000050
+│  │      │  │          f_000051
+│  │      │  │          f_000052
+│  │      │  │          f_000053
+│  │      │  │          f_000054
+│  │      │  │          f_000055
+│  │      │  │          f_000057
+│  │      │  │          f_000058
+│  │      │  │          f_00005d
+│  │      │  │          f_00005e
+│  │      │  │          f_000061
+│  │      │  │          f_000064
+│  │      │  │          f_000067
+│  │      │  │          f_000068
+│  │      │  │          f_000069
+│  │      │  │          f_00006d
+│  │      │  │          f_00006e
+│  │      │  │          f_00006f
+│  │      │  │          f_000070
+│  │      │  │          f_000071
+│  │      │  │          f_000072
+│  │      │  │          f_000073
+│  │      │  │          f_000074
+│  │      │  │          f_000075
+│  │      │  │          f_000076
+│  │      │  │          f_000077
+│  │      │  │          f_000078
+│  │      │  │          f_00007a
+│  │      │  │          f_00007b
+│  │      │  │          f_00007c
+│  │      │  │          f_00007d
+│  │      │  │          f_00007e
+│  │      │  │          f_00007f
+│  │      │  │          f_000080
+│  │      │  │          f_000081
+│  │      │  │          f_000082
+│  │      │  │          f_000083
+│  │      │  │          f_000084
+│  │      │  │          f_000085
+│  │      │  │          f_000086
+│  │      │  │          f_000087
+│  │      │  │          f_000088
+│  │      │  │          f_000089
+│  │      │  │          f_00008a
+│  │      │  │          f_00008f
+│  │      │  │          f_000090
+│  │      │  │          f_000093
+│  │      │  │          f_000094
+│  │      │  │          f_000096
+│  │      │  │          f_000097
+│  │      │  │          f_000098
+│  │      │  │          f_000099
+│  │      │  │          f_00009b
+│  │      │  │          f_00009c
+│  │      │  │          f_00009d
+│  │      │  │          f_00009e
+│  │      │  │          f_00009f
+│  │      │  │          f_0000a0
+│  │      │  │          f_0000a2
+│  │      │  │          f_0000a3
+│  │      │  │          f_0000a4
+│  │      │  │          f_0000a5
+│  │      │  │          f_0000a6
+│  │      │  │          f_0000a7
+│  │      │  │          f_0000a8
+│  │      │  │          f_0000a9
+│  │      │  │          f_0000aa
+│  │      │  │          index
+│  │      │  │          
+│  │      │  ├─chrome_cart_db
+│  │      │  │      LOCK
+│  │      │  │      LOG
+│  │      │  │      LOG.old
+│  │      │  │      
+│  │      │  ├─ClientCertificates
+│  │      │  │      LOCK
+│  │      │  │      LOG
+│  │      │  │      LOG.old
+│  │      │  │      
+│  │      │  ├─Code Cache
+│  │      │  │  ├─js
+│  │      │  │  │  │  0717d4e5e1884981_0
+│  │      │  │  │  │  089a44cda884700d_0
+│  │      │  │  │  │  08cecf80e32fe224_0
+│  │      │  │  │  │  09b01f4a7ac1d0e8_0
+│  │      │  │  │  │  0dd31a27243b72b4_0
+│  │      │  │  │  │  19b9f8e464112c12_0
+│  │      │  │  │  │  1b04da3c95b05741_0
+│  │      │  │  │  │  1ef434d687f33d95_0
+│  │      │  │  │  │  200c6137cb132cc4_0
+│  │      │  │  │  │  212a4aa53970a402_0
+│  │      │  │  │  │  235e641aad872916_0
+│  │      │  │  │  │  2849711a8a357cbc_0
+│  │      │  │  │  │  2f83006d7ea7e15e_0
+│  │      │  │  │  │  2ff7d361e9bab742_0
+│  │      │  │  │  │  3304a40f94ebfeff_0
+│  │      │  │  │  │  34f055aed39730a6_0
+│  │      │  │  │  │  36520fcb6ef29d8b_0
+│  │      │  │  │  │  37645900f95c53bc_0
+│  │      │  │  │  │  3a57db5f82de6f28_0
+│  │      │  │  │  │  3bf6c88f95ecaf32_0
+│  │      │  │  │  │  3e3ff65c7ed90eca_0
+│  │      │  │  │  │  42f4db19fa70ce93_0
+│  │      │  │  │  │  43b0c9fb01b32131_0
+│  │      │  │  │  │  486634e5e2e16b7b_0
+│  │      │  │  │  │  4972fc128a3e4a26_0
+│  │      │  │  │  │  504a829a4989f234_0
+│  │      │  │  │  │  50c39e76ee746b10_0
+│  │      │  │  │  │  52541d8c29659fc0_0
+│  │      │  │  │  │  534e4c05201f6ba3_0
+│  │      │  │  │  │  556181cc6ed17ab0_0
+│  │      │  │  │  │  58dcbe5f89c540df_0
+│  │      │  │  │  │  599fa5fa4edfc03d_0
+│  │      │  │  │  │  5bc3a99ff6553239_0
+│  │      │  │  │  │  5d17d42b845c1417_0
+│  │      │  │  │  │  63317f876f8d5be8_0
+│  │      │  │  │  │  642ff4acd85e62e2_0
+│  │      │  │  │  │  665dff1359f556fd_0
+│  │      │  │  │  │  6724e49a8d120cd3_0
+│  │      │  │  │  │  6885f6efe1710ec9_0
+│  │      │  │  │  │  68a44d7805069543_0
+│  │      │  │  │  │  699ddf96af8b28df_0
+│  │      │  │  │  │  6fdd695aafb07777_0
+│  │      │  │  │  │  718dedc3f3edbf01_0
+│  │      │  │  │  │  761d071643dd9e01_0
+│  │      │  │  │  │  7672bee65f0cda2f_0
+│  │      │  │  │  │  767851a3e91ed265_0
+│  │      │  │  │  │  773838b67b295014_0
+│  │      │  │  │  │  78e73e5e1947053d_0
+│  │      │  │  │  │  7996b88bbc9e2588_0
+│  │      │  │  │  │  7a0a475d1ff882a4_0
+│  │      │  │  │  │  8064692df72be7d9_0
+│  │      │  │  │  │  8729c4eeb73b0376_0
+│  │      │  │  │  │  8b6c332a80a426b0_0
+│  │      │  │  │  │  96688ed814fc9c25_0
+│  │      │  │  │  │  96c00909a14e1a62_0
+│  │      │  │  │  │  96fe5cab1cc3402f_0
+│  │      │  │  │  │  9912dc9cdc830e74_0
+│  │      │  │  │  │  9ecea63ae64ba547_0
+│  │      │  │  │  │  a033f6a9f9a4877f_0
+│  │      │  │  │  │  a2f1ad4b09f29d36_0
+│  │      │  │  │  │  a44a5f8953dd592e_0
+│  │      │  │  │  │  a5b9e2cb88d37990_0
+│  │      │  │  │  │  a5e3d857ff362a2b_0
+│  │      │  │  │  │  a693e43d6fd1ce90_0
+│  │      │  │  │  │  a89de8a1803de02a_0
+│  │      │  │  │  │  ab39cae31524e613_0
+│  │      │  │  │  │  b16e11eb96e1809a_0
+│  │      │  │  │  │  b2298e59d4476991_0
+│  │      │  │  │  │  b335b795ab5d534a_0
+│  │      │  │  │  │  b7a48b0a2b472c99_0
+│  │      │  │  │  │  bb2800ff34f16db2_0
+│  │      │  │  │  │  bd156f407cc1d1ce_0
+│  │      │  │  │  │  bd7de31b43da4b5b_0
+│  │      │  │  │  │  c193289db268946f_0
+│  │      │  │  │  │  c53717a9ce0aca36_0
+│  │      │  │  │  │  c75f96ab57032a69_0
+│  │      │  │  │  │  c77fe91377545c79_0
+│  │      │  │  │  │  cbabe9d0c11d1ba2_0
+│  │      │  │  │  │  cc89346378dde152_0
+│  │      │  │  │  │  cdca7e1396f57bae_0
+│  │      │  │  │  │  cf3fbc27563e5fdc_0
+│  │      │  │  │  │  d2feb91771890790_0
+│  │      │  │  │  │  d56b9dec43d731ed_0
+│  │      │  │  │  │  dc4db01397926225_0
+│  │      │  │  │  │  dd432189463de166_0
+│  │      │  │  │  │  e1f11a454fb4e65d_0
+│  │      │  │  │  │  e36fe5191f3b84e7_0
+│  │      │  │  │  │  e620b74da83082d7_0
+│  │      │  │  │  │  e850532c44564cb1_0
+│  │      │  │  │  │  ebc30ed5d5a962bf_0
+│  │      │  │  │  │  ee98ccc4f56d1646_0
+│  │      │  │  │  │  ef10ecb42c53ec41_0
+│  │      │  │  │  │  ef12263865f32f0e_0
+│  │      │  │  │  │  f197cbea60058ec5_0
+│  │      │  │  │  │  f298ef6800551049_0
+│  │      │  │  │  │  f49e3369edf4fa33_0
+│  │      │  │  │  │  f5f08dc120da4cc8_0
+│  │      │  │  │  │  f89ace31181a7a7e_0
+│  │      │  │  │  │  fd6e24fbac7ee641_0
+│  │      │  │  │  │  fd8f0a3b677d1e85_0
+│  │      │  │  │  │  index
+│  │      │  │  │  │  
+│  │      │  │  │  └─index-dir
+│  │      │  │  │          the-real-index
+│  │      │  │  │          
+│  │      │  │  └─wasm
+│  │      │  │      │  index
+│  │      │  │      │  
+│  │      │  │      └─index-dir
+│  │      │  │              the-real-index
+│  │      │  │              
+│  │      │  ├─commerce_subscription_db
+│  │      │  │      LOCK
+│  │      │  │      LOG
+│  │      │  │      LOG.old
+│  │      │  │      
+│  │      │  ├─DawnGraphiteCache
+│  │      │  │      data_0
+│  │      │  │      data_1
+│  │      │  │      data_2
+│  │      │  │      data_3
+│  │      │  │      index
+│  │      │  │      
+│  │      │  ├─DawnWebGPUCache
+│  │      │  │      data_0
+│  │      │  │      data_1
+│  │      │  │      data_2
+│  │      │  │      data_3
+│  │      │  │      index
+│  │      │  │      
+│  │      │  ├─discounts_db
+│  │      │  │      LOCK
+│  │      │  │      LOG
+│  │      │  │      LOG.old
+│  │      │  │      
+│  │      │  ├─discount_infos_db
+│  │      │  │      LOCK
+│  │      │  │      LOG
+│  │      │  │      LOG.old
+│  │      │  │      
+│  │      │  ├─Download Service
+│  │      │  │  ├─EntryDB
+│  │      │  │  │      LOCK
+│  │      │  │  │      LOG
+│  │      │  │  │      LOG.old
+│  │      │  │  │      
+│  │      │  │  └─Files
+│  │      │  ├─Extension Rules
+│  │      │  │      000003.log
+│  │      │  │      CURRENT
+│  │      │  │      LOCK
+│  │      │  │      LOG
+│  │      │  │      MANIFEST-000001
+│  │      │  │      
+│  │      │  ├─Extension Scripts
+│  │      │  │      000003.log
+│  │      │  │      CURRENT
+│  │      │  │      LOCK
+│  │      │  │      LOG
+│  │      │  │      MANIFEST-000001
+│  │      │  │      
+│  │      │  ├─Extension State
+│  │      │  │      000003.log
+│  │      │  │      CURRENT
+│  │      │  │      LOCK
+│  │      │  │      LOG
+│  │      │  │      LOG.old
+│  │      │  │      MANIFEST-000001
+│  │      │  │      
+│  │      │  ├─Feature Engagement Tracker
+│  │      │  │  ├─AvailabilityDB
+│  │      │  │  │      LOCK
+│  │      │  │  │      LOG
+│  │      │  │  │      LOG.old
+│  │      │  │  │      
+│  │      │  │  └─EventDB
+│  │      │  │          LOCK
+│  │      │  │          LOG
+│  │      │  │          LOG.old
+│  │      │  │          
+│  │      │  ├─GCM Store
+│  │      │  │  │  000003.log
+│  │      │  │  │  CURRENT
+│  │      │  │  │  LOCK
+│  │      │  │  │  LOG
+│  │      │  │  │  LOG.old
+│  │      │  │  │  MANIFEST-000001
+│  │      │  │  │  
+│  │      │  │  └─Encryption
+│  │      │  │          000003.log
+│  │      │  │          CURRENT
+│  │      │  │          LOCK
+│  │      │  │          LOG
+│  │      │  │          LOG.old
+│  │      │  │          MANIFEST-000001
+│  │      │  │          
+│  │      │  ├─GPUCache
+│  │      │  │      data_0
+│  │      │  │      data_1
+│  │      │  │      data_2
+│  │      │  │      data_3
+│  │      │  │      index
+│  │      │  │      
+│  │      │  ├─Local Storage
+│  │      │  │  └─leveldb
+│  │      │  │          000003.log
+│  │      │  │          CURRENT
+│  │      │  │          LOCK
+│  │      │  │          LOG
+│  │      │  │          LOG.old
+│  │      │  │          MANIFEST-000001
+│  │      │  │          
+│  │      │  ├─Network
+│  │      │  │      Cookies
+│  │      │  │      Cookies-journal
+│  │      │  │      Network Persistent State
+│  │      │  │      NetworkDataMigrated
+│  │      │  │      Reporting and NEL
+│  │      │  │      Reporting and NEL-journal
+│  │      │  │      SCT Auditing Pending Reports
+│  │      │  │      TransportSecurity
+│  │      │  │      Trust Tokens
+│  │      │  │      Trust Tokens-journal
+│  │      │  │      
+│  │      │  ├─optimization_guide_hint_cache_store
+│  │      │  │      LOCK
+│  │      │  │      LOG
+│  │      │  │      LOG.old
+│  │      │  │      
+│  │      │  ├─parcel_tracking_db
+│  │      │  │      LOCK
+│  │      │  │      LOG
+│  │      │  │      LOG.old
+│  │      │  │      
+│  │      │  ├─PersistentOriginTrials
+│  │      │  │      LOCK
+│  │      │  │      LOG
+│  │      │  │      LOG.old
+│  │      │  │      
+│  │      │  ├─Safe Browsing Network
+│  │      │  │      NetworkDataMigrated
+│  │      │  │      Safe Browsing Cookies
+│  │      │  │      Safe Browsing Cookies-journal
+│  │      │  │      
+│  │      │  ├─Segmentation Platform
+│  │      │  │  ├─SegmentInfoDB
+│  │      │  │  │      LOCK
+│  │      │  │  │      LOG
+│  │      │  │  │      LOG.old
+│  │      │  │  │      
+│  │      │  │  ├─SignalDB
+│  │      │  │  │      LOCK
+│  │      │  │  │      LOG
+│  │      │  │  │      LOG.old
+│  │      │  │  │      
+│  │      │  │  └─SignalStorageConfigDB
+│  │      │  │          LOCK
+│  │      │  │          LOG
+│  │      │  │          LOG.old
+│  │      │  │          
+│  │      │  ├─Session Storage
+│  │      │  │      000003.log
+│  │      │  │      CURRENT
+│  │      │  │      LOCK
+│  │      │  │      LOG
+│  │      │  │      LOG.old
+│  │      │  │      MANIFEST-000001
+│  │      │  │      
+│  │      │  ├─Sessions
+│  │      │  │      Session_13400594882178738
+│  │      │  │      Session_13400594939595064
+│  │      │  │      Tabs_13400594882279211
+│  │      │  │      Tabs_13400594939688002
+│  │      │  │      
+│  │      │  ├─Shared Dictionary
+│  │      │  │  │  db
+│  │      │  │  │  db-journal
+│  │      │  │  │  
+│  │      │  │  └─cache
+│  │      │  │      │  index
+│  │      │  │      │  
+│  │      │  │      └─index-dir
+│  │      │  │              the-real-index
+│  │      │  │              
+│  │      │  ├─shared_proto_db
+│  │      │  │  │  000003.log
+│  │      │  │  │  CURRENT
+│  │      │  │  │  LOCK
+│  │      │  │  │  LOG
+│  │      │  │  │  LOG.old
+│  │      │  │  │  MANIFEST-000001
+│  │      │  │  │  
+│  │      │  │  └─metadata
+│  │      │  │          000003.log
+│  │      │  │          CURRENT
+│  │      │  │          LOCK
+│  │      │  │          LOG
+│  │      │  │          LOG.old
+│  │      │  │          MANIFEST-000001
+│  │      │  │          
+│  │      │  ├─Site Characteristics Database
+│  │      │  │      000003.log
+│  │      │  │      CURRENT
+│  │      │  │      LOCK
+│  │      │  │      LOG
+│  │      │  │      LOG.old
+│  │      │  │      MANIFEST-000001
+│  │      │  │      
+│  │      │  ├─Sync Data
+│  │      │  │  └─LevelDB
+│  │      │  │          000003.log
+│  │      │  │          CURRENT
+│  │      │  │          LOCK
+│  │      │  │          LOG
+│  │      │  │          LOG.old
+│  │      │  │          MANIFEST-000001
+│  │      │  │          
+│  │      │  └─WebStorage
+│  │      │          QuotaManager
+│  │      │          QuotaManager-journal
+│  │      │          
+│  │      ├─extensions_crx_cache
+│  │      │      metadata.json
+│  │      │      
+│  │      ├─GraphiteDawnCache
+│  │      │      data_0
+│  │      │      data_1
+│  │      │      data_2
+│  │      │      data_3
+│  │      │      index
+│  │      │      
+│  │      ├─GrShaderCache
+│  │      │      data_0
+│  │      │      data_1
+│  │      │      data_2
+│  │      │      data_3
+│  │      │      f_000001
+│  │      │      f_000002
+│  │      │      f_000003
+│  │      │      f_000004
+│  │      │      f_000005
+│  │      │      f_000006
+│  │      │      f_000007
+│  │      │      f_000008
+│  │      │      f_000009
+│  │      │      index
+│  │      │      
+│  │      ├─Safe Browsing
+│  │      ├─segmentation_platform
+│  │      │      ukm_db
+│  │      │      ukm_db-wal
+│  │      │      
+│  │      └─ShaderCache
+│  │              data_0
+│  │              data_1
+│  │              data_2
+│  │              data_3
+│  │              index
+│  │              
+│  ├─logs
+│  │      chrome_diagnostic.log
+│  │      
+│  └─__pycache__
+│          chrome_singleton.cpython-310.pyc
+│          chrome_singleton.cpython-313.pyc
+│          __init__.cpython-310.pyc
+│          __init__.cpython-313.pyc
+│          
+├─logs
+│  │  chrome_diagnostic.log
+│  │  cookies_enter_20250830_210925.txt
+│  │  cookies_enter_20250830_212618.txt
+│  │  cookies_enter_20250830_214712.txt
+│  │  cookies_enter_20250902_214700.txt
+│  │  cookies_enter_20250902_214832.txt
+│  │  cookies_enter_20250902_215002.txt
+│  │  cookies_enter_20250903_090231.txt
+│  │  cookies_enter_20250903_090353.txt
+│  │  cookies_enter_20250903_091045.txt
+│  │  cookies_enter_20250903_091151.txt
+│  │  cookies_enter_20250903_091257.txt
+│  │  cookies_enter_20250903_092639.txt
+│  │  cookies_enter_20250903_101319.txt
+│  │  cookies_enter_20250903_101443.txt
+│  │  cookies_enter_20250903_104545.txt
+│  │  cookies_m3u8_20250830_204706.txt
+│  │  cookies_m3u8_20250830_212720.txt
+│  │  cookies_m3u8_20250830_214814.txt
+│  │  cookies_m3u8_20250902_214801.txt
+│  │  cookies_m3u8_20250902_214933.txt
+│  │  cookies_m3u8_20250902_215103.txt
+│  │  cookies_m3u8_20250903_090333.txt
+│  │  cookies_m3u8_20250903_091147.txt
+│  │  cookies_m3u8_20250903_091253.txt
+│  │  cookies_m3u8_20250903_092741.txt
+│  │  cookies_m3u8_20250903_104647.txt
+│  │  cookies_retry_20250902_214802.txt
+│  │  cookies_retry_20250902_214934.txt
+│  │  cookies_retry_20250902_215104.txt
+│  │  cookies_retry_20250903_090335.txt
+│  │  cookies_retry_20250903_091148.txt
+│  │  cookies_retry_20250903_091254.txt
+│  │  core_diagnostic.log
+│  │  heartbeat.json
+│  │  monitor_20250903_001.jsonl
+│  │  queue_20250831.jsonl
+│  │  wrapper_20250830.jsonl
+│  │  wrapper_20250831.jsonl
+│  │  wrapper_20250902.jsonl
+│  │  wrapper_20250902_205320.jsonl
+│  │  wrapper_20250902_214630.jsonl
+│  │  wrapper_20250903.jsonl
+│  │  wrapper_20250903_001.jsonl
+│  │  
+│  └─cookies
+├─recordings
+├─venv
+│  │  pyvenv.cfg
+│  │  
+│  ├─Include
+│  │  └─site
+│  │      └─python3.10
+│  │          └─greenlet
+│  │                  greenlet.h
+│  │                  
+│  ├─Lib
+│  │  └─site-packages
+│  │      │  distutils-precedence.pth
+│  │      │  typing_extensions.py
+│  │      │  
+│  │      ├─aiofiles
+│  │      │  │  base.py
+│  │      │  │  os.py
+│  │      │  │  ospath.py
+│  │      │  │  __init__.py
+│  │      │  │  
+│  │      │  ├─tempfile
+│  │      │  │      temptypes.py
+│  │      │  │      __init__.py
+│  │      │  │      
+│  │      │  └─threadpool
+│  │      │          binary.py
+│  │      │          text.py
+│  │      │          utils.py
+│  │      │          __init__.py
+│  │      │          
+│  │      ├─aiofiles-24.1.0.dist-info
+│  │      │  │  INSTALLER
+│  │      │  │  METADATA
+│  │      │  │  RECORD
+│  │      │  │  REQUESTED
+│  │      │  │  WHEEL
+│  │      │  │  
+│  │      │  └─licenses
+│  │      │          LICENSE
+│  │      │          NOTICE
+│  │      │          
+│  │      ├─greenlet
+│  │      │  │  CObjects.cpp
+│  │      │  │  greenlet.cpp
+│  │      │  │  greenlet.h
+│  │      │  │  greenlet_allocator.hpp
+│  │      │  │  greenlet_compiler_compat.hpp
+│  │      │  │  greenlet_cpython_compat.hpp
+│  │      │  │  greenlet_exceptions.hpp
+│  │      │  │  greenlet_internal.hpp
+│  │      │  │  greenlet_msvc_compat.hpp
+│  │      │  │  greenlet_refs.hpp
+│  │      │  │  greenlet_slp_switch.hpp
+│  │      │  │  greenlet_thread_support.hpp
+│  │      │  │  PyGreenlet.cpp
+│  │      │  │  PyGreenlet.hpp
+│  │      │  │  PyGreenletUnswitchable.cpp
+│  │      │  │  PyModule.cpp
+│  │      │  │  slp_platformselect.h
+│  │      │  │  TBrokenGreenlet.cpp
+│  │      │  │  TExceptionState.cpp
+│  │      │  │  TGreenlet.cpp
+│  │      │  │  TGreenlet.hpp
+│  │      │  │  TGreenletGlobals.cpp
+│  │      │  │  TMainGreenlet.cpp
+│  │      │  │  TPythonState.cpp
+│  │      │  │  TStackState.cpp
+│  │      │  │  TThreadState.hpp
+│  │      │  │  TThreadStateCreator.hpp
+│  │      │  │  TThreadStateDestroy.cpp
+│  │      │  │  TUserGreenlet.cpp
+│  │      │  │  _greenlet.cp310-win_amd64.pyd
+│  │      │  │  __init__.py
+│  │      │  │  
+│  │      │  ├─platform
+│  │      │  │      setup_switch_x64_masm.cmd
+│  │      │  │      switch_aarch64_gcc.h
+│  │      │  │      switch_alpha_unix.h
+│  │      │  │      switch_amd64_unix.h
+│  │      │  │      switch_arm32_gcc.h
+│  │      │  │      switch_arm32_ios.h
+│  │      │  │      switch_arm64_masm.asm
+│  │      │  │      switch_arm64_masm.obj
+│  │      │  │      switch_arm64_msvc.h
+│  │      │  │      switch_csky_gcc.h
+│  │      │  │      switch_loongarch64_linux.h
+│  │      │  │      switch_m68k_gcc.h
+│  │      │  │      switch_mips_unix.h
+│  │      │  │      switch_ppc64_aix.h
+│  │      │  │      switch_ppc64_linux.h
+│  │      │  │      switch_ppc_aix.h
+│  │      │  │      switch_ppc_linux.h
+│  │      │  │      switch_ppc_macosx.h
+│  │      │  │      switch_ppc_unix.h
+│  │      │  │      switch_riscv_unix.h
+│  │      │  │      switch_s390_unix.h
+│  │      │  │      switch_sh_gcc.h
+│  │      │  │      switch_sparc_sun_gcc.h
+│  │      │  │      switch_x32_unix.h
+│  │      │  │      switch_x64_masm.asm
+│  │      │  │      switch_x64_masm.obj
+│  │      │  │      switch_x64_msvc.h
+│  │      │  │      switch_x86_msvc.h
+│  │      │  │      switch_x86_unix.h
+│  │      │  │      __init__.py
+│  │      │  │      
+│  │      │  └─tests
+│  │      │          fail_clearing_run_switches.py
+│  │      │          fail_cpp_exception.py
+│  │      │          fail_initialstub_already_started.py
+│  │      │          fail_slp_switch.py
+│  │      │          fail_switch_three_greenlets.py
+│  │      │          fail_switch_three_greenlets2.py
+│  │      │          fail_switch_two_greenlets.py
+│  │      │          leakcheck.py
+│  │      │          test_contextvars.py
+│  │      │          test_cpp.py
+│  │      │          test_extension_interface.py
+│  │      │          test_gc.py
+│  │      │          test_generator.py
+│  │      │          test_generator_nested.py
+│  │      │          test_greenlet.py
+│  │      │          test_greenlet_trash.py
+│  │      │          test_leaks.py
+│  │      │          test_stack_saved.py
+│  │      │          test_throw.py
+│  │      │          test_tracing.py
+│  │      │          test_version.py
+│  │      │          test_weakref.py
+│  │      │          _test_extension.c
+│  │      │          _test_extension.cp310-win_amd64.pyd
+│  │      │          _test_extension_cpp.cp310-win_amd64.pyd
+│  │      │          _test_extension_cpp.cpp
+│  │      │          __init__.py
+│  │      │          
+│  │      ├─greenlet-3.2.4.dist-info
+│  │      │  │  INSTALLER
+│  │      │  │  METADATA
+│  │      │  │  RECORD
+│  │      │  │  top_level.txt
+│  │      │  │  WHEEL
+│  │      │  │  
+│  │      │  └─licenses
+│  │      │          LICENSE
+│  │      │          LICENSE.PSF
+│  │      │          
+│  │      ├─pip
+│  │      │  │  py.typed
+│  │      │  │  __init__.py
+│  │      │  │  __main__.py
+│  │      │  │  __pip-runner__.py
+│  │      │  │  
+│  │      │  ├─_internal
+│  │      │  │  │  build_env.py
+│  │      │  │  │  cache.py
+│  │      │  │  │  configuration.py
+│  │      │  │  │  exceptions.py
+│  │      │  │  │  main.py
+│  │      │  │  │  pyproject.py
+│  │      │  │  │  self_outdated_check.py
+│  │      │  │  │  wheel_builder.py
+│  │      │  │  │  __init__.py
+│  │      │  │  │  
+│  │      │  │  ├─cli
+│  │      │  │  │      autocompletion.py
+│  │      │  │  │      base_command.py
+│  │      │  │  │      cmdoptions.py
+│  │      │  │  │      command_context.py
+│  │      │  │  │      main.py
+│  │      │  │  │      main_parser.py
+│  │      │  │  │      parser.py
+│  │      │  │  │      progress_bars.py
+│  │      │  │  │      req_command.py
+│  │      │  │  │      spinners.py
+│  │      │  │  │      status_codes.py
+│  │      │  │  │      __init__.py
+│  │      │  │  │      
+│  │      │  │  ├─commands
+│  │      │  │  │      cache.py
+│  │      │  │  │      check.py
+│  │      │  │  │      completion.py
+│  │      │  │  │      configuration.py
+│  │      │  │  │      debug.py
+│  │      │  │  │      download.py
+│  │      │  │  │      freeze.py
+│  │      │  │  │      hash.py
+│  │      │  │  │      help.py
+│  │      │  │  │      index.py
+│  │      │  │  │      inspect.py
+│  │      │  │  │      install.py
+│  │      │  │  │      list.py
+│  │      │  │  │      search.py
+│  │      │  │  │      show.py
+│  │      │  │  │      uninstall.py
+│  │      │  │  │      wheel.py
+│  │      │  │  │      __init__.py
+│  │      │  │  │      
+│  │      │  │  ├─distributions
+│  │      │  │  │      base.py
+│  │      │  │  │      installed.py
+│  │      │  │  │      sdist.py
+│  │      │  │  │      wheel.py
+│  │      │  │  │      __init__.py
+│  │      │  │  │      
+│  │      │  │  ├─index
+│  │      │  │  │      collector.py
+│  │      │  │  │      package_finder.py
+│  │      │  │  │      sources.py
+│  │      │  │  │      __init__.py
+│  │      │  │  │      
+│  │      │  │  ├─locations
+│  │      │  │  │      base.py
+│  │      │  │  │      _distutils.py
+│  │      │  │  │      _sysconfig.py
+│  │      │  │  │      __init__.py
+│  │      │  │  │      
+│  │      │  │  ├─metadata
+│  │      │  │  │  │  base.py
+│  │      │  │  │  │  pkg_resources.py
+│  │      │  │  │  │  _json.py
+│  │      │  │  │  │  __init__.py
+│  │      │  │  │  │  
+│  │      │  │  │  └─importlib
+│  │      │  │  │          _compat.py
+│  │      │  │  │          _dists.py
+│  │      │  │  │          _envs.py
+│  │      │  │  │          __init__.py
+│  │      │  │  │          
+│  │      │  │  ├─models
+│  │      │  │  │      candidate.py
+│  │      │  │  │      direct_url.py
+│  │      │  │  │      format_control.py
+│  │      │  │  │      index.py
+│  │      │  │  │      installation_report.py
+│  │      │  │  │      link.py
+│  │      │  │  │      scheme.py
+│  │      │  │  │      search_scope.py
+│  │      │  │  │      selection_prefs.py
+│  │      │  │  │      target_python.py
+│  │      │  │  │      wheel.py
+│  │      │  │  │      __init__.py
+│  │      │  │  │      
+│  │      │  │  ├─network
+│  │      │  │  │      auth.py
+│  │      │  │  │      cache.py
+│  │      │  │  │      download.py
+│  │      │  │  │      lazy_wheel.py
+│  │      │  │  │      session.py
+│  │      │  │  │      utils.py
+│  │      │  │  │      xmlrpc.py
+│  │      │  │  │      __init__.py
+│  │      │  │  │      
+│  │      │  │  ├─operations
+│  │      │  │  │  │  check.py
+│  │      │  │  │  │  freeze.py
+│  │      │  │  │  │  prepare.py
+│  │      │  │  │  │  __init__.py
+│  │      │  │  │  │  
+│  │      │  │  │  ├─build
+│  │      │  │  │  │      build_tracker.py
+│  │      │  │  │  │      metadata.py
+│  │      │  │  │  │      metadata_editable.py
+│  │      │  │  │  │      metadata_legacy.py
+│  │      │  │  │  │      wheel.py
+│  │      │  │  │  │      wheel_editable.py
+│  │      │  │  │  │      wheel_legacy.py
+│  │      │  │  │  │      __init__.py
+│  │      │  │  │  │      
+│  │      │  │  │  └─install
+│  │      │  │  │          editable_legacy.py
+│  │      │  │  │          legacy.py
+│  │      │  │  │          wheel.py
+│  │      │  │  │          __init__.py
+│  │      │  │  │          
+│  │      │  │  ├─req
+│  │      │  │  │      constructors.py
+│  │      │  │  │      req_file.py
+│  │      │  │  │      req_install.py
+│  │      │  │  │      req_set.py
+│  │      │  │  │      req_uninstall.py
+│  │      │  │  │      __init__.py
+│  │      │  │  │      
+│  │      │  │  ├─resolution
+│  │      │  │  │  │  base.py
+│  │      │  │  │  │  __init__.py
+│  │      │  │  │  │  
+│  │      │  │  │  ├─legacy
+│  │      │  │  │  │      resolver.py
+│  │      │  │  │  │      __init__.py
+│  │      │  │  │  │      
+│  │      │  │  │  └─resolvelib
+│  │      │  │  │          base.py
+│  │      │  │  │          candidates.py
+│  │      │  │  │          factory.py
+│  │      │  │  │          found_candidates.py
+│  │      │  │  │          provider.py
+│  │      │  │  │          reporter.py
+│  │      │  │  │          requirements.py
+│  │      │  │  │          resolver.py
+│  │      │  │  │          __init__.py
+│  │      │  │  │          
+│  │      │  │  ├─utils
+│  │      │  │  │      appdirs.py
+│  │      │  │  │      compat.py
+│  │      │  │  │      compatibility_tags.py
+│  │      │  │  │      datetime.py
+│  │      │  │  │      deprecation.py
+│  │      │  │  │      direct_url_helpers.py
+│  │      │  │  │      distutils_args.py
+│  │      │  │  │      egg_link.py
+│  │      │  │  │      encoding.py
+│  │      │  │  │      entrypoints.py
+│  │      │  │  │      filesystem.py
+│  │      │  │  │      filetypes.py
+│  │      │  │  │      glibc.py
+│  │      │  │  │      hashes.py
+│  │      │  │  │      inject_securetransport.py
+│  │      │  │  │      logging.py
+│  │      │  │  │      misc.py
+│  │      │  │  │      models.py
+│  │      │  │  │      packaging.py
+│  │      │  │  │      setuptools_build.py
+│  │      │  │  │      subprocess.py
+│  │      │  │  │      temp_dir.py
+│  │      │  │  │      unpacking.py
+│  │      │  │  │      urls.py
+│  │      │  │  │      virtualenv.py
+│  │      │  │  │      wheel.py
+│  │      │  │  │      _log.py
+│  │      │  │  │      __init__.py
+│  │      │  │  │      
+│  │      │  │  └─vcs
+│  │      │  │          bazaar.py
+│  │      │  │          git.py
+│  │      │  │          mercurial.py
+│  │      │  │          subversion.py
+│  │      │  │          versioncontrol.py
+│  │      │  │          __init__.py
+│  │      │  │          
+│  │      │  └─_vendor
+│  │      │      │  six.py
+│  │      │      │  typing_extensions.py
+│  │      │      │  vendor.txt
+│  │      │      │  __init__.py
+│  │      │      │  
+│  │      │      ├─cachecontrol
+│  │      │      │  │  adapter.py
+│  │      │      │  │  cache.py
+│  │      │      │  │  compat.py
+│  │      │      │  │  controller.py
+│  │      │      │  │  filewrapper.py
+│  │      │      │  │  heuristics.py
+│  │      │      │  │  serialize.py
+│  │      │      │  │  wrapper.py
+│  │      │      │  │  _cmd.py
+│  │      │      │  │  __init__.py
+│  │      │      │  │  
+│  │      │      │  └─caches
+│  │      │      │          file_cache.py
+│  │      │      │          redis_cache.py
+│  │      │      │          __init__.py
+│  │      │      │          
+│  │      │      ├─certifi
+│  │      │      │      cacert.pem
+│  │      │      │      core.py
+│  │      │      │      __init__.py
+│  │      │      │      __main__.py
+│  │      │      │      
+│  │      │      ├─chardet
+│  │      │      │  │  big5freq.py
+│  │      │      │  │  big5prober.py
+│  │      │      │  │  chardistribution.py
+│  │      │      │  │  charsetgroupprober.py
+│  │      │      │  │  charsetprober.py
+│  │      │      │  │  codingstatemachine.py
+│  │      │      │  │  cp949prober.py
+│  │      │      │  │  enums.py
+│  │      │      │  │  escprober.py
+│  │      │      │  │  escsm.py
+│  │      │      │  │  eucjpprober.py
+│  │      │      │  │  euckrfreq.py
+│  │      │      │  │  euckrprober.py
+│  │      │      │  │  euctwfreq.py
+│  │      │      │  │  euctwprober.py
+│  │      │      │  │  gb2312freq.py
+│  │      │      │  │  gb2312prober.py
+│  │      │      │  │  hebrewprober.py
+│  │      │      │  │  jisfreq.py
+│  │      │      │  │  johabfreq.py
+│  │      │      │  │  johabprober.py
+│  │      │      │  │  jpcntx.py
+│  │      │      │  │  langbulgarianmodel.py
+│  │      │      │  │  langgreekmodel.py
+│  │      │      │  │  langhebrewmodel.py
+│  │      │      │  │  langhungarianmodel.py
+│  │      │      │  │  langrussianmodel.py
+│  │      │      │  │  langthaimodel.py
+│  │      │      │  │  langturkishmodel.py
+│  │      │      │  │  latin1prober.py
+│  │      │      │  │  mbcharsetprober.py
+│  │      │      │  │  mbcsgroupprober.py
+│  │      │      │  │  mbcssm.py
+│  │      │      │  │  sbcharsetprober.py
+│  │      │      │  │  sbcsgroupprober.py
+│  │      │      │  │  sjisprober.py
+│  │      │      │  │  universaldetector.py
+│  │      │      │  │  utf1632prober.py
+│  │      │      │  │  utf8prober.py
+│  │      │      │  │  version.py
+│  │      │      │  │  __init__.py
+│  │      │      │  │  
+│  │      │      │  ├─cli
+│  │      │      │  │      chardetect.py
+│  │      │      │  │      __init__.py
+│  │      │      │  │      
+│  │      │      │  └─metadata
+│  │      │      │          languages.py
+│  │      │      │          __init__.py
+│  │      │      │          
+│  │      │      ├─colorama
+│  │      │      │      ansi.py
+│  │      │      │      ansitowin32.py
+│  │      │      │      initialise.py
+│  │      │      │      win32.py
+│  │      │      │      winterm.py
+│  │      │      │      __init__.py
+│  │      │      │      
+│  │      │      ├─distlib
+│  │      │      │      compat.py
+│  │      │      │      database.py
+│  │      │      │      index.py
+│  │      │      │      locators.py
+│  │      │      │      manifest.py
+│  │      │      │      markers.py
+│  │      │      │      metadata.py
+│  │      │      │      resources.py
+│  │      │      │      scripts.py
+│  │      │      │      t32.exe
+│  │      │      │      t64-arm.exe
+│  │      │      │      t64.exe
+│  │      │      │      util.py
+│  │      │      │      version.py
+│  │      │      │      w32.exe
+│  │      │      │      w64-arm.exe
+│  │      │      │      w64.exe
+│  │      │      │      wheel.py
+│  │      │      │      __init__.py
+│  │      │      │      
+│  │      │      ├─distro
+│  │      │      │      distro.py
+│  │      │      │      __init__.py
+│  │      │      │      __main__.py
+│  │      │      │      
+│  │      │      ├─idna
+│  │      │      │      codec.py
+│  │      │      │      compat.py
+│  │      │      │      core.py
+│  │      │      │      idnadata.py
+│  │      │      │      intranges.py
+│  │      │      │      package_data.py
+│  │      │      │      uts46data.py
+│  │      │      │      __init__.py
+│  │      │      │      
+│  │      │      ├─msgpack
+│  │      │      │      exceptions.py
+│  │      │      │      ext.py
+│  │      │      │      fallback.py
+│  │      │      │      __init__.py
+│  │      │      │      
+│  │      │      ├─packaging
+│  │      │      │      markers.py
+│  │      │      │      requirements.py
+│  │      │      │      specifiers.py
+│  │      │      │      tags.py
+│  │      │      │      utils.py
+│  │      │      │      version.py
+│  │      │      │      _manylinux.py
+│  │      │      │      _musllinux.py
+│  │      │      │      _structures.py
+│  │      │      │      __about__.py
+│  │      │      │      __init__.py
+│  │      │      │      
+│  │      │      ├─pep517
+│  │      │      │  │  build.py
+│  │      │      │  │  check.py
+│  │      │      │  │  colorlog.py
+│  │      │      │  │  compat.py
+│  │      │      │  │  dirtools.py
+│  │      │      │  │  envbuild.py
+│  │      │      │  │  meta.py
+│  │      │      │  │  wrappers.py
+│  │      │      │  │  __init__.py
+│  │      │      │  │  
+│  │      │      │  └─in_process
+│  │      │      │          _in_process.py
+│  │      │      │          __init__.py
+│  │      │      │          
+│  │      │      ├─pkg_resources
+│  │      │      │      py31compat.py
+│  │      │      │      __init__.py
+│  │      │      │      
+│  │      │      ├─platformdirs
+│  │      │      │      android.py
+│  │      │      │      api.py
+│  │      │      │      macos.py
+│  │      │      │      unix.py
+│  │      │      │      version.py
+│  │      │      │      windows.py
+│  │      │      │      __init__.py
+│  │      │      │      __main__.py
+│  │      │      │      
+│  │      │      ├─pygments
+│  │      │      │  │  cmdline.py
+│  │      │      │  │  console.py
+│  │      │      │  │  filter.py
+│  │      │      │  │  formatter.py
+│  │      │      │  │  lexer.py
+│  │      │      │  │  modeline.py
+│  │      │      │  │  plugin.py
+│  │      │      │  │  regexopt.py
+│  │      │      │  │  scanner.py
+│  │      │      │  │  sphinxext.py
+│  │      │      │  │  style.py
+│  │      │      │  │  token.py
+│  │      │      │  │  unistring.py
+│  │      │      │  │  util.py
+│  │      │      │  │  __init__.py
+│  │      │      │  │  __main__.py
+│  │      │      │  │  
+│  │      │      │  ├─filters
+│  │      │      │  │      __init__.py
+│  │      │      │  │      
+│  │      │      │  ├─formatters
+│  │      │      │  │      bbcode.py
+│  │      │      │  │      groff.py
+│  │      │      │  │      html.py
+│  │      │      │  │      img.py
+│  │      │      │  │      irc.py
+│  │      │      │  │      latex.py
+│  │      │      │  │      other.py
+│  │      │      │  │      pangomarkup.py
+│  │      │      │  │      rtf.py
+│  │      │      │  │      svg.py
+│  │      │      │  │      terminal.py
+│  │      │      │  │      terminal256.py
+│  │      │      │  │      _mapping.py
+│  │      │      │  │      __init__.py
+│  │      │      │  │      
+│  │      │      │  ├─lexers
+│  │      │      │  │      python.py
+│  │      │      │  │      _mapping.py
+│  │      │      │  │      __init__.py
+│  │      │      │  │      
+│  │      │      │  └─styles
+│  │      │      │          __init__.py
+│  │      │      │          
+│  │      │      ├─pyparsing
+│  │      │      │  │  actions.py
+│  │      │      │  │  common.py
+│  │      │      │  │  core.py
+│  │      │      │  │  exceptions.py
+│  │      │      │  │  helpers.py
+│  │      │      │  │  results.py
+│  │      │      │  │  testing.py
+│  │      │      │  │  unicode.py
+│  │      │      │  │  util.py
+│  │      │      │  │  __init__.py
+│  │      │      │  │  
+│  │      │      │  └─diagram
+│  │      │      │          __init__.py
+│  │      │      │          
+│  │      │      ├─requests
+│  │      │      │      adapters.py
+│  │      │      │      api.py
+│  │      │      │      auth.py
+│  │      │      │      certs.py
+│  │      │      │      compat.py
+│  │      │      │      cookies.py
+│  │      │      │      exceptions.py
+│  │      │      │      help.py
+│  │      │      │      hooks.py
+│  │      │      │      models.py
+│  │      │      │      packages.py
+│  │      │      │      sessions.py
+│  │      │      │      status_codes.py
+│  │      │      │      structures.py
+│  │      │      │      utils.py
+│  │      │      │      _internal_utils.py
+│  │      │      │      __init__.py
+│  │      │      │      __version__.py
+│  │      │      │      
+│  │      │      ├─resolvelib
+│  │      │      │  │  providers.py
+│  │      │      │  │  reporters.py
+│  │      │      │  │  resolvers.py
+│  │      │      │  │  structs.py
+│  │      │      │  │  __init__.py
+│  │      │      │  │  
+│  │      │      │  └─compat
+│  │      │      │          collections_abc.py
+│  │      │      │          __init__.py
+│  │      │      │          
+│  │      │      ├─rich
+│  │      │      │      abc.py
+│  │      │      │      align.py
+│  │      │      │      ansi.py
+│  │      │      │      bar.py
+│  │      │      │      box.py
+│  │      │      │      cells.py
+│  │      │      │      color.py
+│  │      │      │      color_triplet.py
+│  │      │      │      columns.py
+│  │      │      │      console.py
+│  │      │      │      constrain.py
+│  │      │      │      containers.py
+│  │      │      │      control.py
+│  │      │      │      default_styles.py
+│  │      │      │      diagnose.py
+│  │      │      │      emoji.py
+│  │      │      │      errors.py
+│  │      │      │      filesize.py
+│  │      │      │      file_proxy.py
+│  │      │      │      highlighter.py
+│  │      │      │      json.py
+│  │      │      │      jupyter.py
+│  │      │      │      layout.py
+│  │      │      │      live.py
+│  │      │      │      live_render.py
+│  │      │      │      logging.py
+│  │      │      │      markup.py
+│  │      │      │      measure.py
+│  │      │      │      padding.py
+│  │      │      │      pager.py
+│  │      │      │      palette.py
+│  │      │      │      panel.py
+│  │      │      │      pretty.py
+│  │      │      │      progress.py
+│  │      │      │      progress_bar.py
+│  │      │      │      prompt.py
+│  │      │      │      protocol.py
+│  │      │      │      region.py
+│  │      │      │      repr.py
+│  │      │      │      rule.py
+│  │      │      │      scope.py
+│  │      │      │      screen.py
+│  │      │      │      segment.py
+│  │      │      │      spinner.py
+│  │      │      │      status.py
+│  │      │      │      style.py
+│  │      │      │      styled.py
+│  │      │      │      syntax.py
+│  │      │      │      table.py
+│  │      │      │      terminal_theme.py
+│  │      │      │      text.py
+│  │      │      │      theme.py
+│  │      │      │      themes.py
+│  │      │      │      traceback.py
+│  │      │      │      tree.py
+│  │      │      │      _cell_widths.py
+│  │      │      │      _emoji_codes.py
+│  │      │      │      _emoji_replace.py
+│  │      │      │      _export_format.py
+│  │      │      │      _extension.py
+│  │      │      │      _inspect.py
+│  │      │      │      _log_render.py
+│  │      │      │      _loop.py
+│  │      │      │      _palettes.py
+│  │      │      │      _pick.py
+│  │      │      │      _ratio.py
+│  │      │      │      _spinners.py
+│  │      │      │      _stack.py
+│  │      │      │      _timer.py
+│  │      │      │      _win32_console.py
+│  │      │      │      _windows.py
+│  │      │      │      _windows_renderer.py
+│  │      │      │      _wrap.py
+│  │      │      │      __init__.py
+│  │      │      │      __main__.py
+│  │      │      │      
+│  │      │      ├─tenacity
+│  │      │      │      after.py
+│  │      │      │      before.py
+│  │      │      │      before_sleep.py
+│  │      │      │      nap.py
+│  │      │      │      retry.py
+│  │      │      │      stop.py
+│  │      │      │      tornadoweb.py
+│  │      │      │      wait.py
+│  │      │      │      _asyncio.py
+│  │      │      │      _utils.py
+│  │      │      │      __init__.py
+│  │      │      │      
+│  │      │      ├─tomli
+│  │      │      │      _parser.py
+│  │      │      │      _re.py
+│  │      │      │      _types.py
+│  │      │      │      __init__.py
+│  │      │      │      
+│  │      │      ├─urllib3
+│  │      │      │  │  connection.py
+│  │      │      │  │  connectionpool.py
+│  │      │      │  │  exceptions.py
+│  │      │      │  │  fields.py
+│  │      │      │  │  filepost.py
+│  │      │      │  │  poolmanager.py
+│  │      │      │  │  request.py
+│  │      │      │  │  response.py
+│  │      │      │  │  _collections.py
+│  │      │      │  │  _version.py
+│  │      │      │  │  __init__.py
+│  │      │      │  │  
+│  │      │      │  ├─contrib
+│  │      │      │  │  │  appengine.py
+│  │      │      │  │  │  ntlmpool.py
+│  │      │      │  │  │  pyopenssl.py
+│  │      │      │  │  │  securetransport.py
+│  │      │      │  │  │  socks.py
+│  │      │      │  │  │  _appengine_environ.py
+│  │      │      │  │  │  __init__.py
+│  │      │      │  │  │  
+│  │      │      │  │  └─_securetransport
+│  │      │      │  │          bindings.py
+│  │      │      │  │          low_level.py
+│  │      │      │  │          __init__.py
+│  │      │      │  │          
+│  │      │      │  ├─packages
+│  │      │      │  │  │  six.py
+│  │      │      │  │  │  __init__.py
+│  │      │      │  │  │  
+│  │      │      │  │  └─backports
+│  │      │      │  │          makefile.py
+│  │      │      │  │          __init__.py
+│  │      │      │  │          
+│  │      │      │  └─util
+│  │      │      │          connection.py
+│  │      │      │          proxy.py
+│  │      │      │          queue.py
+│  │      │      │          request.py
+│  │      │      │          response.py
+│  │      │      │          retry.py
+│  │      │      │          ssltransport.py
+│  │      │      │          ssl_.py
+│  │      │      │          ssl_match_hostname.py
+│  │      │      │          timeout.py
+│  │      │      │          url.py
+│  │      │      │          wait.py
+│  │      │      │          __init__.py
+│  │      │      │          
+│  │      │      └─webencodings
+│  │      │              labels.py
+│  │      │              mklabels.py
+│  │      │              tests.py
+│  │      │              x_user_defined.py
+│  │      │              __init__.py
+│  │      │              
+│  │      ├─pip-22.2.1.dist-info
+│  │      │      entry_points.txt
+│  │      │      INSTALLER
+│  │      │      LICENSE.txt
+│  │      │      METADATA
+│  │      │      RECORD
+│  │      │      REQUESTED
+│  │      │      top_level.txt
+│  │      │      WHEEL
+│  │      │      
+│  │      ├─pkg_resources
+│  │      │  │  __init__.py
+│  │      │  │  
+│  │      │  ├─extern
+│  │      │  │      __init__.py
+│  │      │  │      
+│  │      │  └─_vendor
+│  │      │      │  appdirs.py
+│  │      │      │  zipp.py
+│  │      │      │  __init__.py
+│  │      │      │  
+│  │      │      ├─importlib_resources
+│  │      │      │      abc.py
+│  │      │      │      readers.py
+│  │      │      │      simple.py
+│  │      │      │      _adapters.py
+│  │      │      │      _common.py
+│  │      │      │      _compat.py
+│  │      │      │      _itertools.py
+│  │      │      │      _legacy.py
+│  │      │      │      __init__.py
+│  │      │      │      
+│  │      │      ├─jaraco
+│  │      │      │  │  context.py
+│  │      │      │  │  functools.py
+│  │      │      │  │  __init__.py
+│  │      │      │  │  
+│  │      │      │  └─text
+│  │      │      │          __init__.py
+│  │      │      │          
+│  │      │      ├─more_itertools
+│  │      │      │      more.py
+│  │      │      │      recipes.py
+│  │      │      │      __init__.py
+│  │      │      │      
+│  │      │      ├─packaging
+│  │      │      │      markers.py
+│  │      │      │      requirements.py
+│  │      │      │      specifiers.py
+│  │      │      │      tags.py
+│  │      │      │      utils.py
+│  │      │      │      version.py
+│  │      │      │      _manylinux.py
+│  │      │      │      _musllinux.py
+│  │      │      │      _structures.py
+│  │      │      │      __about__.py
+│  │      │      │      __init__.py
+│  │      │      │      
+│  │      │      └─pyparsing
+│  │      │          │  actions.py
+│  │      │          │  common.py
+│  │      │          │  core.py
+│  │      │          │  exceptions.py
+│  │      │          │  helpers.py
+│  │      │          │  results.py
+│  │      │          │  testing.py
+│  │      │          │  unicode.py
+│  │      │          │  util.py
+│  │      │          │  __init__.py
+│  │      │          │  
+│  │      │          └─diagram
+│  │      │                  __init__.py
+│  │      │                  
+│  │      ├─playwright
+│  │      │  │  py.typed
+│  │      │  │  _repo_version.py
+│  │      │  │  __init__.py
+│  │      │  │  __main__.py
+│  │      │  │  
+│  │      │  ├─async_api
+│  │      │  │      _context_manager.py
+│  │      │  │      _generated.py
+│  │      │  │      __init__.py
+│  │      │  │      
+│  │      │  ├─driver
+│  │      │  │  │  LICENSE
+│  │      │  │  │  node.exe
+│  │      │  │  │  README.md
+│  │      │  │  │  
+│  │      │  │  └─package
+│  │      │  │      │  api.json
+│  │      │  │      │  browsers.json
+│  │      │  │      │  cli.js
+│  │      │  │      │  index.d.ts
+│  │      │  │      │  index.js
+│  │      │  │      │  index.mjs
+│  │      │  │      │  package.json
+│  │      │  │      │  protocol.yml
+│  │      │  │      │  README.md
+│  │      │  │      │  ThirdPartyNotices.txt
+│  │      │  │      │  
+│  │      │  │      ├─bin
+│  │      │  │      │      install_media_pack.ps1
+│  │      │  │      │      reinstall_chrome_beta_linux.sh
+│  │      │  │      │      reinstall_chrome_beta_mac.sh
+│  │      │  │      │      reinstall_chrome_beta_win.ps1
+│  │      │  │      │      reinstall_chrome_stable_linux.sh
+│  │      │  │      │      reinstall_chrome_stable_mac.sh
+│  │      │  │      │      reinstall_chrome_stable_win.ps1
+│  │      │  │      │      reinstall_msedge_beta_linux.sh
+│  │      │  │      │      reinstall_msedge_beta_mac.sh
+│  │      │  │      │      reinstall_msedge_beta_win.ps1
+│  │      │  │      │      reinstall_msedge_dev_linux.sh
+│  │      │  │      │      reinstall_msedge_dev_mac.sh
+│  │      │  │      │      reinstall_msedge_dev_win.ps1
+│  │      │  │      │      reinstall_msedge_stable_linux.sh
+│  │      │  │      │      reinstall_msedge_stable_mac.sh
+│  │      │  │      │      reinstall_msedge_stable_win.ps1
+│  │      │  │      │      
+│  │      │  │      ├─lib
+│  │      │  │      │  │  androidServerImpl.js
+│  │      │  │      │  │  browserServerImpl.js
+│  │      │  │      │  │  inprocess.js
+│  │      │  │      │  │  inProcessFactory.js
+│  │      │  │      │  │  outofprocess.js
+│  │      │  │      │  │  utils.js
+│  │      │  │      │  │  utilsBundle.js
+│  │      │  │      │  │  zipBundle.js
+│  │      │  │      │  │  zipBundleImpl.js
+│  │      │  │      │  │  
+│  │      │  │      │  ├─cli
+│  │      │  │      │  │      driver.js
+│  │      │  │      │  │      program.js
+│  │      │  │      │  │      programWithTestStub.js
+│  │      │  │      │  │      
+│  │      │  │      │  ├─client
+│  │      │  │      │  │      accessibility.js
+│  │      │  │      │  │      android.js
+│  │      │  │      │  │      api.js
+│  │      │  │      │  │      artifact.js
+│  │      │  │      │  │      browser.js
+│  │      │  │      │  │      browserContext.js
+│  │      │  │      │  │      browserType.js
+│  │      │  │      │  │      cdpSession.js
+│  │      │  │      │  │      channelOwner.js
+│  │      │  │      │  │      clientHelper.js
+│  │      │  │      │  │      clientInstrumentation.js
+│  │      │  │      │  │      clientStackTrace.js
+│  │      │  │      │  │      clock.js
+│  │      │  │      │  │      connection.js
+│  │      │  │      │  │      consoleMessage.js
+│  │      │  │      │  │      coverage.js
+│  │      │  │      │  │      dialog.js
+│  │      │  │      │  │      download.js
+│  │      │  │      │  │      electron.js
+│  │      │  │      │  │      elementHandle.js
+│  │      │  │      │  │      errors.js
+│  │      │  │      │  │      eventEmitter.js
+│  │      │  │      │  │      events.js
+│  │      │  │      │  │      fetch.js
+│  │      │  │      │  │      fileChooser.js
+│  │      │  │      │  │      fileUtils.js
+│  │      │  │      │  │      frame.js
+│  │      │  │      │  │      harRouter.js
+│  │      │  │      │  │      input.js
+│  │      │  │      │  │      jsHandle.js
+│  │      │  │      │  │      jsonPipe.js
+│  │      │  │      │  │      localUtils.js
+│  │      │  │      │  │      locator.js
+│  │      │  │      │  │      network.js
+│  │      │  │      │  │      page.js
+│  │      │  │      │  │      platform.js
+│  │      │  │      │  │      playwright.js
+│  │      │  │      │  │      selectors.js
+│  │      │  │      │  │      stream.js
+│  │      │  │      │  │      timeoutSettings.js
+│  │      │  │      │  │      tracing.js
+│  │      │  │      │  │      types.js
+│  │      │  │      │  │      video.js
+│  │      │  │      │  │      waiter.js
+│  │      │  │      │  │      webError.js
+│  │      │  │      │  │      webSocket.js
+│  │      │  │      │  │      worker.js
+│  │      │  │      │  │      writableStream.js
+│  │      │  │      │  │      
+│  │      │  │      │  ├─generated
+│  │      │  │      │  │      bindingsControllerSource.js
+│  │      │  │      │  │      clockSource.js
+│  │      │  │      │  │      injectedScriptSource.js
+│  │      │  │      │  │      pollingRecorderSource.js
+│  │      │  │      │  │      storageScriptSource.js
+│  │      │  │      │  │      utilityScriptSource.js
+│  │      │  │      │  │      webSocketMockSource.js
+│  │      │  │      │  │      
+│  │      │  │      │  ├─protocol
+│  │      │  │      │  │      serializers.js
+│  │      │  │      │  │      validator.js
+│  │      │  │      │  │      validatorPrimitives.js
+│  │      │  │      │  │      
+│  │      │  │      │  ├─remote
+│  │      │  │      │  │      playwrightConnection.js
+│  │      │  │      │  │      playwrightServer.js
+│  │      │  │      │  │      
+│  │      │  │      │  ├─server
+│  │      │  │      │  │  │  accessibility.js
+│  │      │  │      │  │  │  artifact.js
+│  │      │  │      │  │  │  browser.js
+│  │      │  │      │  │  │  browserContext.js
+│  │      │  │      │  │  │  browserType.js
+│  │      │  │      │  │  │  callLog.js
+│  │      │  │      │  │  │  clock.js
+│  │      │  │      │  │  │  console.js
+│  │      │  │      │  │  │  cookieStore.js
+│  │      │  │      │  │  │  debugController.js
+│  │      │  │      │  │  │  debugger.js
+│  │      │  │      │  │  │  deviceDescriptors.js
+│  │      │  │      │  │  │  deviceDescriptorsSource.json
+│  │      │  │      │  │  │  dialog.js
+│  │      │  │      │  │  │  dom.js
+│  │      │  │      │  │  │  download.js
+│  │      │  │      │  │  │  errors.js
+│  │      │  │      │  │  │  fetch.js
+│  │      │  │      │  │  │  fileChooser.js
+│  │      │  │      │  │  │  fileUploadUtils.js
+│  │      │  │      │  │  │  formData.js
+│  │      │  │      │  │  │  frames.js
+│  │      │  │      │  │  │  frameSelectors.js
+│  │      │  │      │  │  │  harBackend.js
+│  │      │  │      │  │  │  helper.js
+│  │      │  │      │  │  │  index.js
+│  │      │  │      │  │  │  input.js
+│  │      │  │      │  │  │  instrumentation.js
+│  │      │  │      │  │  │  javascript.js
+│  │      │  │      │  │  │  launchApp.js
+│  │      │  │      │  │  │  localUtils.js
+│  │      │  │      │  │  │  macEditingCommands.js
+│  │      │  │      │  │  │  network.js
+│  │      │  │      │  │  │  page.js
+│  │      │  │      │  │  │  pipeTransport.js
+│  │      │  │      │  │  │  playwright.js
+│  │      │  │      │  │  │  progress.js
+│  │      │  │      │  │  │  protocolError.js
+│  │      │  │      │  │  │  recorder.js
+│  │      │  │      │  │  │  screenshotter.js
+│  │      │  │      │  │  │  selectors.js
+│  │      │  │      │  │  │  socksClientCertificatesInterceptor.js
+│  │      │  │      │  │  │  socksInterceptor.js
+│  │      │  │      │  │  │  transport.js
+│  │      │  │      │  │  │  types.js
+│  │      │  │      │  │  │  usKeyboardLayout.js
+│  │      │  │      │  │  │  
+│  │      │  │      │  │  ├─android
+│  │      │  │      │  │  │      android.js
+│  │      │  │      │  │  │      backendAdb.js
+│  │      │  │      │  │  │      
+│  │      │  │      │  │  ├─bidi
+│  │      │  │      │  │  │  │  bidiBrowser.js
+│  │      │  │      │  │  │  │  bidiChromium.js
+│  │      │  │      │  │  │  │  bidiConnection.js
+│  │      │  │      │  │  │  │  bidiExecutionContext.js
+│  │      │  │      │  │  │  │  bidiFirefox.js
+│  │      │  │      │  │  │  │  bidiInput.js
+│  │      │  │      │  │  │  │  bidiNetworkManager.js
+│  │      │  │      │  │  │  │  bidiOverCdp.js
+│  │      │  │      │  │  │  │  bidiPage.js
+│  │      │  │      │  │  │  │  bidiPdf.js
+│  │      │  │      │  │  │  │  
+│  │      │  │      │  │  │  └─third_party
+│  │      │  │      │  │  │          bidiCommands.d.js
+│  │      │  │      │  │  │          bidiDeserializer.js
+│  │      │  │      │  │  │          bidiKeyboard.js
+│  │      │  │      │  │  │          bidiProtocol.js
+│  │      │  │      │  │  │          bidiProtocolCore.js
+│  │      │  │      │  │  │          bidiProtocolPermissions.js
+│  │      │  │      │  │  │          bidiSerializer.js
+│  │      │  │      │  │  │          firefoxPrefs.js
+│  │      │  │      │  │  │          
+│  │      │  │      │  │  ├─chromium
+│  │      │  │      │  │  │      appIcon.png
+│  │      │  │      │  │  │      chromium.js
+│  │      │  │      │  │  │      chromiumSwitches.js
+│  │      │  │      │  │  │      crAccessibility.js
+│  │      │  │      │  │  │      crBrowser.js
+│  │      │  │      │  │  │      crConnection.js
+│  │      │  │      │  │  │      crCoverage.js
+│  │      │  │      │  │  │      crDevTools.js
+│  │      │  │      │  │  │      crDragDrop.js
+│  │      │  │      │  │  │      crExecutionContext.js
+│  │      │  │      │  │  │      crInput.js
+│  │      │  │      │  │  │      crNetworkManager.js
+│  │      │  │      │  │  │      crPage.js
+│  │      │  │      │  │  │      crPdf.js
+│  │      │  │      │  │  │      crProtocolHelper.js
+│  │      │  │      │  │  │      crServiceWorker.js
+│  │      │  │      │  │  │      defaultFontFamilies.js
+│  │      │  │      │  │  │      protocol.d.js
+│  │      │  │      │  │  │      videoRecorder.js
+│  │      │  │      │  │  │      
+│  │      │  │      │  │  ├─codegen
+│  │      │  │      │  │  │      csharp.js
+│  │      │  │      │  │  │      java.js
+│  │      │  │      │  │  │      javascript.js
+│  │      │  │      │  │  │      jsonl.js
+│  │      │  │      │  │  │      language.js
+│  │      │  │      │  │  │      languages.js
+│  │      │  │      │  │  │      python.js
+│  │      │  │      │  │  │      types.js
+│  │      │  │      │  │  │      
+│  │      │  │      │  │  ├─dispatchers
+│  │      │  │      │  │  │      androidDispatcher.js
+│  │      │  │      │  │  │      artifactDispatcher.js
+│  │      │  │      │  │  │      browserContextDispatcher.js
+│  │      │  │      │  │  │      browserDispatcher.js
+│  │      │  │      │  │  │      browserTypeDispatcher.js
+│  │      │  │      │  │  │      cdpSessionDispatcher.js
+│  │      │  │      │  │  │      debugControllerDispatcher.js
+│  │      │  │      │  │  │      dialogDispatcher.js
+│  │      │  │      │  │  │      dispatcher.js
+│  │      │  │      │  │  │      electronDispatcher.js
+│  │      │  │      │  │  │      elementHandlerDispatcher.js
+│  │      │  │      │  │  │      frameDispatcher.js
+│  │      │  │      │  │  │      jsHandleDispatcher.js
+│  │      │  │      │  │  │      jsonPipeDispatcher.js
+│  │      │  │      │  │  │      localUtilsDispatcher.js
+│  │      │  │      │  │  │      networkDispatchers.js
+│  │      │  │      │  │  │      pageDispatcher.js
+│  │      │  │      │  │  │      playwrightDispatcher.js
+│  │      │  │      │  │  │      streamDispatcher.js
+│  │      │  │      │  │  │      tracingDispatcher.js
+│  │      │  │      │  │  │      webSocketRouteDispatcher.js
+│  │      │  │      │  │  │      writableStreamDispatcher.js
+│  │      │  │      │  │  │      
+│  │      │  │      │  │  ├─electron
+│  │      │  │      │  │  │      electron.js
+│  │      │  │      │  │  │      loader.js
+│  │      │  │      │  │  │      
+│  │      │  │      │  │  ├─firefox
+│  │      │  │      │  │  │      ffAccessibility.js
+│  │      │  │      │  │  │      ffBrowser.js
+│  │      │  │      │  │  │      ffConnection.js
+│  │      │  │      │  │  │      ffExecutionContext.js
+│  │      │  │      │  │  │      ffInput.js
+│  │      │  │      │  │  │      ffNetworkManager.js
+│  │      │  │      │  │  │      ffPage.js
+│  │      │  │      │  │  │      firefox.js
+│  │      │  │      │  │  │      protocol.d.js
+│  │      │  │      │  │  │      
+│  │      │  │      │  │  ├─har
+│  │      │  │      │  │  │      harRecorder.js
+│  │      │  │      │  │  │      harTracer.js
+│  │      │  │      │  │  │      
+│  │      │  │      │  │  ├─recorder
+│  │      │  │      │  │  │      chat.js
+│  │      │  │      │  │  │      recorderApp.js
+│  │      │  │      │  │  │      recorderRunner.js
+│  │      │  │      │  │  │      recorderSignalProcessor.js
+│  │      │  │      │  │  │      recorderUtils.js
+│  │      │  │      │  │  │      throttledFile.js
+│  │      │  │      │  │  │      
+│  │      │  │      │  │  ├─registry
+│  │      │  │      │  │  │      browserFetcher.js
+│  │      │  │      │  │  │      dependencies.js
+│  │      │  │      │  │  │      index.js
+│  │      │  │      │  │  │      nativeDeps.js
+│  │      │  │      │  │  │      oopDownloadBrowserMain.js
+│  │      │  │      │  │  │      
+│  │      │  │      │  │  ├─trace
+│  │      │  │      │  │  │  ├─recorder
+│  │      │  │      │  │  │  │      snapshotter.js
+│  │      │  │      │  │  │  │      snapshotterInjected.js
+│  │      │  │      │  │  │  │      tracing.js
+│  │      │  │      │  │  │  │      
+│  │      │  │      │  │  │  ├─test
+│  │      │  │      │  │  │  │      inMemorySnapshotter.js
+│  │      │  │      │  │  │  │      
+│  │      │  │      │  │  │  └─viewer
+│  │      │  │      │  │  │          traceViewer.js
+│  │      │  │      │  │  │          
+│  │      │  │      │  │  ├─utils
+│  │      │  │      │  │  │  │  ascii.js
+│  │      │  │      │  │  │  │  comparators.js
+│  │      │  │      │  │  │  │  crypto.js
+│  │      │  │      │  │  │  │  debug.js
+│  │      │  │      │  │  │  │  debugLogger.js
+│  │      │  │      │  │  │  │  env.js
+│  │      │  │      │  │  │  │  eventsHelper.js
+│  │      │  │      │  │  │  │  expectUtils.js
+│  │      │  │      │  │  │  │  fileUtils.js
+│  │      │  │      │  │  │  │  happyEyeballs.js
+│  │      │  │      │  │  │  │  hostPlatform.js
+│  │      │  │      │  │  │  │  httpServer.js
+│  │      │  │      │  │  │  │  linuxUtils.js
+│  │      │  │      │  │  │  │  network.js
+│  │      │  │      │  │  │  │  nodePlatform.js
+│  │      │  │      │  │  │  │  pipeTransport.js
+│  │      │  │      │  │  │  │  processLauncher.js
+│  │      │  │      │  │  │  │  profiler.js
+│  │      │  │      │  │  │  │  socksProxy.js
+│  │      │  │      │  │  │  │  spawnAsync.js
+│  │      │  │      │  │  │  │  task.js
+│  │      │  │      │  │  │  │  userAgent.js
+│  │      │  │      │  │  │  │  wsServer.js
+│  │      │  │      │  │  │  │  zipFile.js
+│  │      │  │      │  │  │  │  zones.js
+│  │      │  │      │  │  │  │  
+│  │      │  │      │  │  │  └─image_tools
+│  │      │  │      │  │  │          colorUtils.js
+│  │      │  │      │  │  │          compare.js
+│  │      │  │      │  │  │          imageChannel.js
+│  │      │  │      │  │  │          stats.js
+│  │      │  │      │  │  │          
+│  │      │  │      │  │  └─webkit
+│  │      │  │      │  │          protocol.d.js
+│  │      │  │      │  │          webkit.js
+│  │      │  │      │  │          wkAccessibility.js
+│  │      │  │      │  │          wkBrowser.js
+│  │      │  │      │  │          wkConnection.js
+│  │      │  │      │  │          wkExecutionContext.js
+│  │      │  │      │  │          wkInput.js
+│  │      │  │      │  │          wkInterceptableRequest.js
+│  │      │  │      │  │          wkPage.js
+│  │      │  │      │  │          wkProvisionalPage.js
+│  │      │  │      │  │          wkWorkers.js
+│  │      │  │      │  │          
+│  │      │  │      │  ├─third_party
+│  │      │  │      │  │      pixelmatch.js
+│  │      │  │      │  │      
+│  │      │  │      │  ├─utils
+│  │      │  │      │  │  └─isomorphic
+│  │      │  │      │  │          ariaSnapshot.js
+│  │      │  │      │  │          assert.js
+│  │      │  │      │  │          colors.js
+│  │      │  │      │  │          cssParser.js
+│  │      │  │      │  │          cssTokenizer.js
+│  │      │  │      │  │          headers.js
+│  │      │  │      │  │          locatorGenerators.js
+│  │      │  │      │  │          locatorParser.js
+│  │      │  │      │  │          locatorUtils.js
+│  │      │  │      │  │          manualPromise.js
+│  │      │  │      │  │          mimeType.js
+│  │      │  │      │  │          multimap.js
+│  │      │  │      │  │          protocolFormatter.js
+│  │      │  │      │  │          protocolMetainfo.js
+│  │      │  │      │  │          rtti.js
+│  │      │  │      │  │          selectorParser.js
+│  │      │  │      │  │          semaphore.js
+│  │      │  │      │  │          stackTrace.js
+│  │      │  │      │  │          stringUtils.js
+│  │      │  │      │  │          time.js
+│  │      │  │      │  │          timeoutRunner.js
+│  │      │  │      │  │          traceUtils.js
+│  │      │  │      │  │          types.js
+│  │      │  │      │  │          urlMatch.js
+│  │      │  │      │  │          utilityScriptSerializers.js
+│  │      │  │      │  │          
+│  │      │  │      │  ├─utilsBundleImpl
+│  │      │  │      │  │      index.js
+│  │      │  │      │  │      xdg-open
+│  │      │  │      │  │      
+│  │      │  │      │  └─vite
+│  │      │  │      │      ├─htmlReport
+│  │      │  │      │      │      index.html
+│  │      │  │      │      │      
+│  │      │  │      │      ├─recorder
+│  │      │  │      │      │  │  index.html
+│  │      │  │      │      │  │  playwright-logo.svg
+│  │      │  │      │      │  │  
+│  │      │  │      │      │  └─assets
+│  │      │  │      │      │          codeMirrorModule-C3UTv-Ge.css
+│  │      │  │      │      │          codeMirrorModule-ISMgoUzq.js
+│  │      │  │      │      │          codicon-DCmgc-ay.ttf
+│  │      │  │      │      │          index-Ds0aE8ml.js
+│  │      │  │      │      │          index-eHBmevrY.css
+│  │      │  │      │      │          
+│  │      │  │      │      └─traceViewer
+│  │      │  │      │          │  codeMirrorModule.C3UTv-Ge.css
+│  │      │  │      │          │  codicon.DCmgc-ay.ttf
+│  │      │  │      │          │  defaultSettingsView.NYBT19Ch.css
+│  │      │  │      │          │  index.CFOW-Ezb.css
+│  │      │  │      │          │  index.CG3BNeDq.js
+│  │      │  │      │          │  index.html
+│  │      │  │      │          │  playwright-logo.svg
+│  │      │  │      │          │  snapshot.html
+│  │      │  │      │          │  sw.bundle.js
+│  │      │  │      │          │  uiMode.BatfzHMG.css
+│  │      │  │      │          │  uiMode.BijnIl3L.js
+│  │      │  │      │          │  uiMode.html
+│  │      │  │      │          │  xtermModule.Beg8tuEN.css
+│  │      │  │      │          │  
+│  │      │  │      │          └─assets
+│  │      │  │      │                  codeMirrorModule-3kZ8GVgK.js
+│  │      │  │      │                  defaultSettingsView-Ds-bson8.js
+│  │      │  │      │                  xtermModule-BoAIEibi.js
+│  │      │  │      │                  
+│  │      │  │      └─types
+│  │      │  │              protocol.d.ts
+│  │      │  │              structs.d.ts
+│  │      │  │              types.d.ts
+│  │      │  │              
+│  │      │  ├─sync_api
+│  │      │  │      _context_manager.py
+│  │      │  │      _generated.py
+│  │      │  │      __init__.py
+│  │      │  │      
+│  │      │  └─_impl
+│  │      │      │  _accessibility.py
+│  │      │      │  _api_structures.py
+│  │      │      │  _artifact.py
+│  │      │      │  _assertions.py
+│  │      │      │  _async_base.py
+│  │      │      │  _browser.py
+│  │      │      │  _browser_context.py
+│  │      │      │  _browser_type.py
+│  │      │      │  _cdp_session.py
+│  │      │      │  _clock.py
+│  │      │      │  _connection.py
+│  │      │      │  _console_message.py
+│  │      │      │  _dialog.py
+│  │      │      │  _download.py
+│  │      │      │  _driver.py
+│  │      │      │  _element_handle.py
+│  │      │      │  _errors.py
+│  │      │      │  _event_context_manager.py
+│  │      │      │  _fetch.py
+│  │      │      │  _file_chooser.py
+│  │      │      │  _frame.py
+│  │      │      │  _glob.py
+│  │      │      │  _greenlets.py
+│  │      │      │  _har_router.py
+│  │      │      │  _helper.py
+│  │      │      │  _impl_to_api_mapping.py
+│  │      │      │  _input.py
+│  │      │      │  _json_pipe.py
+│  │      │      │  _js_handle.py
+│  │      │      │  _local_utils.py
+│  │      │      │  _locator.py
+│  │      │      │  _map.py
+│  │      │      │  _network.py
+│  │      │      │  _object_factory.py
+│  │      │      │  _page.py
+│  │      │      │  _path_utils.py
+│  │      │      │  _playwright.py
+│  │      │      │  _selectors.py
+│  │      │      │  _set_input_files_helpers.py
+│  │      │      │  _stream.py
+│  │      │      │  _str_utils.py
+│  │      │      │  _sync_base.py
+│  │      │      │  _tracing.py
+│  │      │      │  _transport.py
+│  │      │      │  _video.py
+│  │      │      │  _waiter.py
+│  │      │      │  _web_error.py
+│  │      │      │  _writable_stream.py
+│  │      │      │  __init__.py
+│  │      │      │  
+│  │      │      └─__pyinstaller
+│  │      │              hook-playwright.async_api.py
+│  │      │              hook-playwright.sync_api.py
+│  │      │              __init__.py
+│  │      │              
+│  │      ├─playwright-1.54.0.dist-info
+│  │      │  │  entry_points.txt
+│  │      │  │  INSTALLER
+│  │      │  │  METADATA
+│  │      │  │  RECORD
+│  │      │  │  REQUESTED
+│  │      │  │  top_level.txt
+│  │      │  │  WHEEL
+│  │      │  │  
+│  │      │  └─licenses
+│  │      │          LICENSE
+│  │      │          
+│  │      ├─pyee
+│  │      │      asyncio.py
+│  │      │      base.py
+│  │      │      cls.py
+│  │      │      executor.py
+│  │      │      py.typed
+│  │      │      trio.py
+│  │      │      twisted.py
+│  │      │      uplift.py
+│  │      │      __init__.py
+│  │      │      
+│  │      ├─pyee-13.0.0.dist-info
+│  │      │      INSTALLER
+│  │      │      LICENSE
+│  │      │      METADATA
+│  │      │      RECORD
+│  │      │      top_level.txt
+│  │      │      WHEEL
+│  │      │      
+│  │      ├─setuptools
+│  │      │  │  archive_util.py
+│  │      │  │  build_meta.py
+│  │      │  │  cli-32.exe
+│  │      │  │  cli-64.exe
+│  │      │  │  cli-arm64.exe
+│  │      │  │  cli.exe
+│  │      │  │  depends.py
+│  │      │  │  dep_util.py
+│  │      │  │  discovery.py
+│  │      │  │  dist.py
+│  │      │  │  errors.py
+│  │      │  │  extension.py
+│  │      │  │  glob.py
+│  │      │  │  gui-32.exe
+│  │      │  │  gui-64.exe
+│  │      │  │  gui-arm64.exe
+│  │      │  │  gui.exe
+│  │      │  │  installer.py
+│  │      │  │  launch.py
+│  │      │  │  logging.py
+│  │      │  │  monkey.py
+│  │      │  │  msvc.py
+│  │      │  │  namespaces.py
+│  │      │  │  package_index.py
+│  │      │  │  py34compat.py
+│  │      │  │  sandbox.py
+│  │      │  │  script (dev).tmpl
+│  │      │  │  script.tmpl
+│  │      │  │  unicode_utils.py
+│  │      │  │  version.py
+│  │      │  │  wheel.py
+│  │      │  │  windows_support.py
+│  │      │  │  _deprecation_warning.py
+│  │      │  │  _entry_points.py
+│  │      │  │  _imp.py
+│  │      │  │  _importlib.py
+│  │      │  │  _itertools.py
+│  │      │  │  _path.py
+│  │      │  │  _reqs.py
+│  │      │  │  __init__.py
+│  │      │  │  
+│  │      │  ├─command
+│  │      │  │      alias.py
+│  │      │  │      bdist_egg.py
+│  │      │  │      bdist_rpm.py
+│  │      │  │      build.py
+│  │      │  │      build_clib.py
+│  │      │  │      build_ext.py
+│  │      │  │      build_py.py
+│  │      │  │      develop.py
+│  │      │  │      dist_info.py
+│  │      │  │      easy_install.py
+│  │      │  │      egg_info.py
+│  │      │  │      install.py
+│  │      │  │      install_egg_info.py
+│  │      │  │      install_lib.py
+│  │      │  │      install_scripts.py
+│  │      │  │      launcher manifest.xml
+│  │      │  │      py36compat.py
+│  │      │  │      register.py
+│  │      │  │      rotate.py
+│  │      │  │      saveopts.py
+│  │      │  │      sdist.py
+│  │      │  │      setopt.py
+│  │      │  │      test.py
+│  │      │  │      upload.py
+│  │      │  │      upload_docs.py
+│  │      │  │      __init__.py
+│  │      │  │      
+│  │      │  ├─config
+│  │      │  │  │  expand.py
+│  │      │  │  │  pyprojecttoml.py
+│  │      │  │  │  setupcfg.py
+│  │      │  │  │  _apply_pyprojecttoml.py
+│  │      │  │  │  __init__.py
+│  │      │  │  │  
+│  │      │  │  └─_validate_pyproject
+│  │      │  │          error_reporting.py
+│  │      │  │          extra_validations.py
+│  │      │  │          fastjsonschema_exceptions.py
+│  │      │  │          fastjsonschema_validations.py
+│  │      │  │          formats.py
+│  │      │  │          __init__.py
+│  │      │  │          
+│  │      │  ├─extern
+│  │      │  │      __init__.py
+│  │      │  │      
+│  │      │  ├─_distutils
+│  │      │  │  │  archive_util.py
+│  │      │  │  │  bcppcompiler.py
+│  │      │  │  │  ccompiler.py
+│  │      │  │  │  cmd.py
+│  │      │  │  │  config.py
+│  │      │  │  │  core.py
+│  │      │  │  │  cygwinccompiler.py
+│  │      │  │  │  debug.py
+│  │      │  │  │  dep_util.py
+│  │      │  │  │  dir_util.py
+│  │      │  │  │  dist.py
+│  │      │  │  │  errors.py
+│  │      │  │  │  extension.py
+│  │      │  │  │  fancy_getopt.py
+│  │      │  │  │  filelist.py
+│  │      │  │  │  file_util.py
+│  │      │  │  │  log.py
+│  │      │  │  │  msvc9compiler.py
+│  │      │  │  │  msvccompiler.py
+│  │      │  │  │  py38compat.py
+│  │      │  │  │  py39compat.py
+│  │      │  │  │  spawn.py
+│  │      │  │  │  sysconfig.py
+│  │      │  │  │  text_file.py
+│  │      │  │  │  unixccompiler.py
+│  │      │  │  │  util.py
+│  │      │  │  │  version.py
+│  │      │  │  │  versionpredicate.py
+│  │      │  │  │  _collections.py
+│  │      │  │  │  _functools.py
+│  │      │  │  │  _macos_compat.py
+│  │      │  │  │  _msvccompiler.py
+│  │      │  │  │  __init__.py
+│  │      │  │  │  
+│  │      │  │  └─command
+│  │      │  │          bdist.py
+│  │      │  │          bdist_dumb.py
+│  │      │  │          bdist_msi.py
+│  │      │  │          bdist_rpm.py
+│  │      │  │          bdist_wininst.py
+│  │      │  │          build.py
+│  │      │  │          build_clib.py
+│  │      │  │          build_ext.py
+│  │      │  │          build_py.py
+│  │      │  │          build_scripts.py
+│  │      │  │          check.py
+│  │      │  │          clean.py
+│  │      │  │          config.py
+│  │      │  │          install.py
+│  │      │  │          install_data.py
+│  │      │  │          install_egg_info.py
+│  │      │  │          install_headers.py
+│  │      │  │          install_lib.py
+│  │      │  │          install_scripts.py
+│  │      │  │          py37compat.py
+│  │      │  │          register.py
+│  │      │  │          sdist.py
+│  │      │  │          upload.py
+│  │      │  │          _framework_compat.py
+│  │      │  │          __init__.py
+│  │      │  │          
+│  │      │  └─_vendor
+│  │      │      │  ordered_set.py
+│  │      │      │  typing_extensions.py
+│  │      │      │  zipp.py
+│  │      │      │  __init__.py
+│  │      │      │  
+│  │      │      ├─importlib_metadata
+│  │      │      │      _adapters.py
+│  │      │      │      _collections.py
+│  │      │      │      _compat.py
+│  │      │      │      _functools.py
+│  │      │      │      _itertools.py
+│  │      │      │      _meta.py
+│  │      │      │      _text.py
+│  │      │      │      __init__.py
+│  │      │      │      
+│  │      │      ├─importlib_resources
+│  │      │      │      abc.py
+│  │      │      │      readers.py
+│  │      │      │      simple.py
+│  │      │      │      _adapters.py
+│  │      │      │      _common.py
+│  │      │      │      _compat.py
+│  │      │      │      _itertools.py
+│  │      │      │      _legacy.py
+│  │      │      │      __init__.py
+│  │      │      │      
+│  │      │      ├─jaraco
+│  │      │      │  │  context.py
+│  │      │      │  │  functools.py
+│  │      │      │  │  __init__.py
+│  │      │      │  │  
+│  │      │      │  └─text
+│  │      │      │          __init__.py
+│  │      │      │          
+│  │      │      ├─more_itertools
+│  │      │      │      more.py
+│  │      │      │      recipes.py
+│  │      │      │      __init__.py
+│  │      │      │      
+│  │      │      ├─packaging
+│  │      │      │      markers.py
+│  │      │      │      requirements.py
+│  │      │      │      specifiers.py
+│  │      │      │      tags.py
+│  │      │      │      utils.py
+│  │      │      │      version.py
+│  │      │      │      _manylinux.py
+│  │      │      │      _musllinux.py
+│  │      │      │      _structures.py
+│  │      │      │      __about__.py
+│  │      │      │      __init__.py
+│  │      │      │      
+│  │      │      ├─pyparsing
+│  │      │      │  │  actions.py
+│  │      │      │  │  common.py
+│  │      │      │  │  core.py
+│  │      │      │  │  exceptions.py
+│  │      │      │  │  helpers.py
+│  │      │      │  │  results.py
+│  │      │      │  │  testing.py
+│  │      │      │  │  unicode.py
+│  │      │      │  │  util.py
+│  │      │      │  │  __init__.py
+│  │      │      │  │  
+│  │      │      │  └─diagram
+│  │      │      │          __init__.py
+│  │      │      │          
+│  │      │      └─tomli
+│  │      │              _parser.py
+│  │      │              _re.py
+│  │      │              _types.py
+│  │      │              __init__.py
+│  │      │              
+│  │      ├─setuptools-63.2.0.dist-info
+│  │      │      entry_points.txt
+│  │      │      LICENSE
+│  │      │      METADATA
+│  │      │      RECORD
+│  │      │      top_level.txt
+│  │      │      WHEEL
+│  │      │      
+│  │      ├─typing_extensions-4.14.1.dist-info
+│  │      │  │  INSTALLER
+│  │      │  │  METADATA
+│  │      │  │  RECORD
+│  │      │  │  WHEEL
+│  │      │  │  
+│  │      │  └─licenses
+│  │      │          LICENSE
+│  │      │          
+│  │      ├─yt_dlp
+│  │      │  │  aes.py
+│  │      │  │  cache.py
+│  │      │  │  cookies.py
+│  │      │  │  globals.py
+│  │      │  │  jsinterp.py
+│  │      │  │  minicurses.py
+│  │      │  │  options.py
+│  │      │  │  plugins.py
+│  │      │  │  socks.py
+│  │      │  │  update.py
+│  │      │  │  version.py
+│  │      │  │  webvtt.py
+│  │      │  │  YoutubeDL.py
+│  │      │  │  __init__.py
+│  │      │  │  __main__.py
+│  │      │  │  
+│  │      │  ├─compat
+│  │      │  │  │  compat_utils.py
+│  │      │  │  │  imghdr.py
+│  │      │  │  │  shutil.py
+│  │      │  │  │  types.py
+│  │      │  │  │  _deprecated.py
+│  │      │  │  │  _legacy.py
+│  │      │  │  │  __init__.py
+│  │      │  │  │  
+│  │      │  │  └─urllib
+│  │      │  │          request.py
+│  │      │  │          __init__.py
+│  │      │  │          
+│  │      │  ├─dependencies
+│  │      │  │      Cryptodome.py
+│  │      │  │      __init__.py
+│  │      │  │      
+│  │      │  ├─downloader
+│  │      │  │      bunnycdn.py
+│  │      │  │      common.py
+│  │      │  │      dash.py
+│  │      │  │      external.py
+│  │      │  │      f4m.py
+│  │      │  │      fc2.py
+│  │      │  │      fragment.py
+│  │      │  │      hls.py
+│  │      │  │      http.py
+│  │      │  │      ism.py
+│  │      │  │      mhtml.py
+│  │      │  │      niconico.py
+│  │      │  │      rtmp.py
+│  │      │  │      rtsp.py
+│  │      │  │      websocket.py
+│  │      │  │      youtube_live_chat.py
+│  │      │  │      __init__.py
+│  │      │  │      
+│  │      │  ├─extractor
+│  │      │  │  │  abc.py
+│  │      │  │  │  abcnews.py
+│  │      │  │  │  abcotvs.py
+│  │      │  │  │  abematv.py
+│  │      │  │  │  academicearth.py
+│  │      │  │  │  acast.py
+│  │      │  │  │  acfun.py
+│  │      │  │  │  adn.py
+│  │      │  │  │  adobeconnect.py
+│  │      │  │  │  adobepass.py
+│  │      │  │  │  adobetv.py
+│  │      │  │  │  adultswim.py
+│  │      │  │  │  aenetworks.py
+│  │      │  │  │  aeonco.py
+│  │      │  │  │  afreecatv.py
+│  │      │  │  │  agora.py
+│  │      │  │  │  airtv.py
+│  │      │  │  │  aitube.py
+│  │      │  │  │  aliexpress.py
+│  │      │  │  │  aljazeera.py
+│  │      │  │  │  allocine.py
+│  │      │  │  │  allstar.py
+│  │      │  │  │  alphaporno.py
+│  │      │  │  │  alsace20tv.py
+│  │      │  │  │  altcensored.py
+│  │      │  │  │  alura.py
+│  │      │  │  │  amadeustv.py
+│  │      │  │  │  amara.py
+│  │      │  │  │  amazon.py
+│  │      │  │  │  amazonminitv.py
+│  │      │  │  │  amcnetworks.py
+│  │      │  │  │  americastestkitchen.py
+│  │      │  │  │  amp.py
+│  │      │  │  │  anchorfm.py
+│  │      │  │  │  angel.py
+│  │      │  │  │  antenna.py
+│  │      │  │  │  anvato.py
+│  │      │  │  │  aol.py
+│  │      │  │  │  apa.py
+│  │      │  │  │  aparat.py
+│  │      │  │  │  appleconnect.py
+│  │      │  │  │  applepodcasts.py
+│  │      │  │  │  appletrailers.py
+│  │      │  │  │  archiveorg.py
+│  │      │  │  │  arcpublishing.py
+│  │      │  │  │  ard.py
+│  │      │  │  │  arkena.py
+│  │      │  │  │  arnes.py
+│  │      │  │  │  art19.py
+│  │      │  │  │  arte.py
+│  │      │  │  │  asobichannel.py
+│  │      │  │  │  asobistage.py
+│  │      │  │  │  atresplayer.py
+│  │      │  │  │  atscaleconf.py
+│  │      │  │  │  atvat.py
+│  │      │  │  │  audimedia.py
+│  │      │  │  │  audioboom.py
+│  │      │  │  │  audiodraft.py
+│  │      │  │  │  audiomack.py
+│  │      │  │  │  audius.py
+│  │      │  │  │  awaan.py
+│  │      │  │  │  aws.py
+│  │      │  │  │  axs.py
+│  │      │  │  │  azmedien.py
+│  │      │  │  │  baidu.py
+│  │      │  │  │  banbye.py
+│  │      │  │  │  bandcamp.py
+│  │      │  │  │  bandlab.py
+│  │      │  │  │  bannedvideo.py
+│  │      │  │  │  bbc.py
+│  │      │  │  │  beacon.py
+│  │      │  │  │  beatbump.py
+│  │      │  │  │  beatport.py
+│  │      │  │  │  beeg.py
+│  │      │  │  │  behindkink.py
+│  │      │  │  │  berufetv.py
+│  │      │  │  │  bet.py
+│  │      │  │  │  bfi.py
+│  │      │  │  │  bfmtv.py
+│  │      │  │  │  bibeltv.py
+│  │      │  │  │  bigflix.py
+│  │      │  │  │  bigo.py
+│  │      │  │  │  bild.py
+│  │      │  │  │  bilibili.py
+│  │      │  │  │  biobiochiletv.py
+│  │      │  │  │  bitchute.py
+│  │      │  │  │  blackboardcollaborate.py
+│  │      │  │  │  bleacherreport.py
+│  │      │  │  │  blerp.py
+│  │      │  │  │  blogger.py
+│  │      │  │  │  bloomberg.py
+│  │      │  │  │  bluesky.py
+│  │      │  │  │  bokecc.py
+│  │      │  │  │  bongacams.py
+│  │      │  │  │  boosty.py
+│  │      │  │  │  bostonglobe.py
+│  │      │  │  │  box.py
+│  │      │  │  │  boxcast.py
+│  │      │  │  │  bpb.py
+│  │      │  │  │  br.py
+│  │      │  │  │  brainpop.py
+│  │      │  │  │  breitbart.py
+│  │      │  │  │  brightcove.py
+│  │      │  │  │  brilliantpala.py
+│  │      │  │  │  btvplus.py
+│  │      │  │  │  bundesliga.py
+│  │      │  │  │  bundestag.py
+│  │      │  │  │  bunnycdn.py
+│  │      │  │  │  businessinsider.py
+│  │      │  │  │  buzzfeed.py
+│  │      │  │  │  byutv.py
+│  │      │  │  │  c56.py
+│  │      │  │  │  caffeinetv.py
+│  │      │  │  │  callin.py
+│  │      │  │  │  caltrans.py
+│  │      │  │  │  cam4.py
+│  │      │  │  │  camdemy.py
+│  │      │  │  │  camfm.py
+│  │      │  │  │  cammodels.py
+│  │      │  │  │  camsoda.py
+│  │      │  │  │  camtasia.py
+│  │      │  │  │  canal1.py
+│  │      │  │  │  canalalpha.py
+│  │      │  │  │  canalc2.py
+│  │      │  │  │  canalplus.py
+│  │      │  │  │  canalsurmas.py
+│  │      │  │  │  caracoltv.py
+│  │      │  │  │  cbc.py
+│  │      │  │  │  cbs.py
+│  │      │  │  │  cbsnews.py
+│  │      │  │  │  cbssports.py
+│  │      │  │  │  ccc.py
+│  │      │  │  │  ccma.py
+│  │      │  │  │  cctv.py
+│  │      │  │  │  cda.py
+│  │      │  │  │  cellebrite.py
+│  │      │  │  │  ceskatelevize.py
+│  │      │  │  │  cgtn.py
+│  │      │  │  │  charlierose.py
+│  │      │  │  │  chaturbate.py
+│  │      │  │  │  chilloutzone.py
+│  │      │  │  │  chzzk.py
+│  │      │  │  │  cinemax.py
+│  │      │  │  │  cinetecamilano.py
+│  │      │  │  │  cineverse.py
+│  │      │  │  │  ciscolive.py
+│  │      │  │  │  ciscowebex.py
+│  │      │  │  │  cjsw.py
+│  │      │  │  │  clipchamp.py
+│  │      │  │  │  clippit.py
+│  │      │  │  │  cliprs.py
+│  │      │  │  │  closertotruth.py
+│  │      │  │  │  cloudflarestream.py
+│  │      │  │  │  cloudycdn.py
+│  │      │  │  │  clubic.py
+│  │      │  │  │  clyp.py
+│  │      │  │  │  cmt.py
+│  │      │  │  │  cnbc.py
+│  │      │  │  │  cnn.py
+│  │      │  │  │  comedycentral.py
+│  │      │  │  │  common.py
+│  │      │  │  │  commonmistakes.py
+│  │      │  │  │  commonprotocols.py
+│  │      │  │  │  condenast.py
+│  │      │  │  │  contv.py
+│  │      │  │  │  corus.py
+│  │      │  │  │  coub.py
+│  │      │  │  │  cozytv.py
+│  │      │  │  │  cpac.py
+│  │      │  │  │  cracked.py
+│  │      │  │  │  crackle.py
+│  │      │  │  │  craftsy.py
+│  │      │  │  │  crooksandliars.py
+│  │      │  │  │  crowdbunker.py
+│  │      │  │  │  crtvg.py
+│  │      │  │  │  cspan.py
+│  │      │  │  │  ctsnews.py
+│  │      │  │  │  ctvnews.py
+│  │      │  │  │  cultureunplugged.py
+│  │      │  │  │  curiositystream.py
+│  │      │  │  │  cwtv.py
+│  │      │  │  │  cybrary.py
+│  │      │  │  │  dacast.py
+│  │      │  │  │  dailymail.py
+│  │      │  │  │  dailymotion.py
+│  │      │  │  │  dailywire.py
+│  │      │  │  │  damtomo.py
+│  │      │  │  │  dangalplay.py
+│  │      │  │  │  daum.py
+│  │      │  │  │  daystar.py
+│  │      │  │  │  dbtv.py
+│  │      │  │  │  dctp.py
+│  │      │  │  │  democracynow.py
+│  │      │  │  │  detik.py
+│  │      │  │  │  deuxm.py
+│  │      │  │  │  dfb.py
+│  │      │  │  │  dhm.py
+│  │      │  │  │  digitalconcerthall.py
+│  │      │  │  │  digiteka.py
+│  │      │  │  │  digiview.py
+│  │      │  │  │  discogs.py
+│  │      │  │  │  disney.py
+│  │      │  │  │  dispeak.py
+│  │      │  │  │  dlf.py
+│  │      │  │  │  dlive.py
+│  │      │  │  │  douyutv.py
+│  │      │  │  │  dplay.py
+│  │      │  │  │  drbonanza.py
+│  │      │  │  │  dreisat.py
+│  │      │  │  │  drooble.py
+│  │      │  │  │  dropbox.py
+│  │      │  │  │  dropout.py
+│  │      │  │  │  drtalks.py
+│  │      │  │  │  drtuber.py
+│  │      │  │  │  drtv.py
+│  │      │  │  │  dtube.py
+│  │      │  │  │  duboku.py
+│  │      │  │  │  dumpert.py
+│  │      │  │  │  duoplay.py
+│  │      │  │  │  dvtv.py
+│  │      │  │  │  dw.py
+│  │      │  │  │  ebaumsworld.py
+│  │      │  │  │  ebay.py
+│  │      │  │  │  egghead.py
+│  │      │  │  │  eggs.py
+│  │      │  │  │  eighttracks.py
+│  │      │  │  │  eitb.py
+│  │      │  │  │  elementorembed.py
+│  │      │  │  │  elonet.py
+│  │      │  │  │  elpais.py
+│  │      │  │  │  eltrecetv.py
+│  │      │  │  │  embedly.py
+│  │      │  │  │  epicon.py
+│  │      │  │  │  epidemicsound.py
+│  │      │  │  │  eplus.py
+│  │      │  │  │  epoch.py
+│  │      │  │  │  eporner.py
+│  │      │  │  │  erocast.py
+│  │      │  │  │  eroprofile.py
+│  │      │  │  │  err.py
+│  │      │  │  │  ertgr.py
+│  │      │  │  │  espn.py
+│  │      │  │  │  ettutv.py
+│  │      │  │  │  europa.py
+│  │      │  │  │  europeantour.py
+│  │      │  │  │  eurosport.py
+│  │      │  │  │  euscreen.py
+│  │      │  │  │  expressen.py
+│  │      │  │  │  extractors.py
+│  │      │  │  │  eyedotv.py
+│  │      │  │  │  facebook.py
+│  │      │  │  │  fancode.py
+│  │      │  │  │  fathom.py
+│  │      │  │  │  faulio.py
+│  │      │  │  │  faz.py
+│  │      │  │  │  fc2.py
+│  │      │  │  │  fczenit.py
+│  │      │  │  │  fifa.py
+│  │      │  │  │  filmon.py
+│  │      │  │  │  filmweb.py
+│  │      │  │  │  firsttv.py
+│  │      │  │  │  fivetv.py
+│  │      │  │  │  flextv.py
+│  │      │  │  │  flickr.py
+│  │      │  │  │  floatplane.py
+│  │      │  │  │  folketinget.py
+│  │      │  │  │  footyroom.py
+│  │      │  │  │  formula1.py
+│  │      │  │  │  fourtube.py
+│  │      │  │  │  fox.py
+│  │      │  │  │  fox9.py
+│  │      │  │  │  foxnews.py
+│  │      │  │  │  foxsports.py
+│  │      │  │  │  fptplay.py
+│  │      │  │  │  francaisfacile.py
+│  │      │  │  │  franceinter.py
+│  │      │  │  │  francetv.py
+│  │      │  │  │  freesound.py
+│  │      │  │  │  freespeech.py
+│  │      │  │  │  freetv.py
+│  │      │  │  │  frontendmasters.py
+│  │      │  │  │  fujitv.py
+│  │      │  │  │  funk.py
+│  │      │  │  │  funker530.py
+│  │      │  │  │  fuyintv.py
+│  │      │  │  │  gab.py
+│  │      │  │  │  gaia.py
+│  │      │  │  │  gamedevtv.py
+│  │      │  │  │  gamejolt.py
+│  │      │  │  │  gamespot.py
+│  │      │  │  │  gamestar.py
+│  │      │  │  │  gaskrank.py
+│  │      │  │  │  gazeta.py
+│  │      │  │  │  gbnews.py
+│  │      │  │  │  gdcvault.py
+│  │      │  │  │  gedidigital.py
+│  │      │  │  │  generic.py
+│  │      │  │  │  genericembeds.py
+│  │      │  │  │  genius.py
+│  │      │  │  │  germanupa.py
+│  │      │  │  │  getcourseru.py
+│  │      │  │  │  gettr.py
+│  │      │  │  │  giantbomb.py
+│  │      │  │  │  glide.py
+│  │      │  │  │  globalplayer.py
+│  │      │  │  │  globo.py
+│  │      │  │  │  glomex.py
+│  │      │  │  │  gmanetwork.py
+│  │      │  │  │  go.py
+│  │      │  │  │  godresource.py
+│  │      │  │  │  godtube.py
+│  │      │  │  │  gofile.py
+│  │      │  │  │  golem.py
+│  │      │  │  │  goodgame.py
+│  │      │  │  │  googledrive.py
+│  │      │  │  │  googlepodcasts.py
+│  │      │  │  │  googlesearch.py
+│  │      │  │  │  goplay.py
+│  │      │  │  │  gopro.py
+│  │      │  │  │  goshgay.py
+│  │      │  │  │  gotostage.py
+│  │      │  │  │  gputechconf.py
+│  │      │  │  │  graspop.py
+│  │      │  │  │  gronkh.py
+│  │      │  │  │  groupon.py
+│  │      │  │  │  harpodeon.py
+│  │      │  │  │  hbo.py
+│  │      │  │  │  hearthisat.py
+│  │      │  │  │  heise.py
+│  │      │  │  │  hellporno.py
+│  │      │  │  │  hgtv.py
+│  │      │  │  │  hidive.py
+│  │      │  │  │  historicfilms.py
+│  │      │  │  │  hitrecord.py
+│  │      │  │  │  hketv.py
+│  │      │  │  │  hollywoodreporter.py
+│  │      │  │  │  holodex.py
+│  │      │  │  │  hotnewhiphop.py
+│  │      │  │  │  hotstar.py
+│  │      │  │  │  hrefli.py
+│  │      │  │  │  hrfensehen.py
+│  │      │  │  │  hrti.py
+│  │      │  │  │  hse.py
+│  │      │  │  │  huajiao.py
+│  │      │  │  │  huffpost.py
+│  │      │  │  │  hungama.py
+│  │      │  │  │  huya.py
+│  │      │  │  │  hypem.py
+│  │      │  │  │  hypergryph.py
+│  │      │  │  │  hytale.py
+│  │      │  │  │  icareus.py
+│  │      │  │  │  ichinanalive.py
+│  │      │  │  │  idolplus.py
+│  │      │  │  │  ign.py
+│  │      │  │  │  iheart.py
+│  │      │  │  │  ilpost.py
+│  │      │  │  │  iltalehti.py
+│  │      │  │  │  imdb.py
+│  │      │  │  │  imggaming.py
+│  │      │  │  │  imgur.py
+│  │      │  │  │  ina.py
+│  │      │  │  │  inc.py
+│  │      │  │  │  indavideo.py
+│  │      │  │  │  infoq.py
+│  │      │  │  │  instagram.py
+│  │      │  │  │  internazionale.py
+│  │      │  │  │  internetvideoarchive.py
+│  │      │  │  │  iprima.py
+│  │      │  │  │  iqiyi.py
+│  │      │  │  │  islamchannel.py
+│  │      │  │  │  israelnationalnews.py
+│  │      │  │  │  itprotv.py
+│  │      │  │  │  itv.py
+│  │      │  │  │  ivi.py
+│  │      │  │  │  ivideon.py
+│  │      │  │  │  ivoox.py
+│  │      │  │  │  iwara.py
+│  │      │  │  │  ixigua.py
+│  │      │  │  │  izlesene.py
+│  │      │  │  │  jamendo.py
+│  │      │  │  │  japandiet.py
+│  │      │  │  │  jeuxvideo.py
+│  │      │  │  │  jiosaavn.py
+│  │      │  │  │  jixie.py
+│  │      │  │  │  joj.py
+│  │      │  │  │  jove.py
+│  │      │  │  │  jstream.py
+│  │      │  │  │  jtbc.py
+│  │      │  │  │  jwplatform.py
+│  │      │  │  │  kakao.py
+│  │      │  │  │  kaltura.py
+│  │      │  │  │  kankanews.py
+│  │      │  │  │  karaoketv.py
+│  │      │  │  │  kelbyone.py
+│  │      │  │  │  kenh14.py
+│  │      │  │  │  khanacademy.py
+│  │      │  │  │  kick.py
+│  │      │  │  │  kicker.py
+│  │      │  │  │  kickstarter.py
+│  │      │  │  │  kika.py
+│  │      │  │  │  kinja.py
+│  │      │  │  │  kinopoisk.py
+│  │      │  │  │  kommunetv.py
+│  │      │  │  │  kompas.py
+│  │      │  │  │  koo.py
+│  │      │  │  │  krasview.py
+│  │      │  │  │  kth.py
+│  │      │  │  │  ku6.py
+│  │      │  │  │  kukululive.py
+│  │      │  │  │  kuwo.py
+│  │      │  │  │  la7.py
+│  │      │  │  │  laracasts.py
+│  │      │  │  │  lastfm.py
+│  │      │  │  │  laxarxames.py
+│  │      │  │  │  lazy_extractors.py
+│  │      │  │  │  lbry.py
+│  │      │  │  │  lci.py
+│  │      │  │  │  lcp.py
+│  │      │  │  │  learningonscreen.py
+│  │      │  │  │  lecture2go.py
+│  │      │  │  │  lecturio.py
+│  │      │  │  │  leeco.py
+│  │      │  │  │  lefigaro.py
+│  │      │  │  │  lego.py
+│  │      │  │  │  lemonde.py
+│  │      │  │  │  lenta.py
+│  │      │  │  │  libraryofcongress.py
+│  │      │  │  │  libsyn.py
+│  │      │  │  │  lifenews.py
+│  │      │  │  │  likee.py
+│  │      │  │  │  linkedin.py
+│  │      │  │  │  liputan6.py
+│  │      │  │  │  listennotes.py
+│  │      │  │  │  litv.py
+│  │      │  │  │  livejournal.py
+│  │      │  │  │  livestream.py
+│  │      │  │  │  livestreamfails.py
+│  │      │  │  │  lnk.py
+│  │      │  │  │  loco.py
+│  │      │  │  │  loom.py
+│  │      │  │  │  lovehomeporn.py
+│  │      │  │  │  lrt.py
+│  │      │  │  │  lsm.py
+│  │      │  │  │  lumni.py
+│  │      │  │  │  lynda.py
+│  │      │  │  │  maariv.py
+│  │      │  │  │  magellantv.py
+│  │      │  │  │  magentamusik.py
+│  │      │  │  │  mailru.py
+│  │      │  │  │  mainstreaming.py
+│  │      │  │  │  mangomolo.py
+│  │      │  │  │  manoto.py
+│  │      │  │  │  manyvids.py
+│  │      │  │  │  maoritv.py
+│  │      │  │  │  markiza.py
+│  │      │  │  │  massengeschmacktv.py
+│  │      │  │  │  masters.py
+│  │      │  │  │  matchtv.py
+│  │      │  │  │  mave.py
+│  │      │  │  │  mbn.py
+│  │      │  │  │  mdr.py
+│  │      │  │  │  medaltv.py
+│  │      │  │  │  mediaite.py
+│  │      │  │  │  mediaklikk.py
+│  │      │  │  │  medialaan.py
+│  │      │  │  │  mediaset.py
+│  │      │  │  │  mediasite.py
+│  │      │  │  │  mediastream.py
+│  │      │  │  │  mediaworksnz.py
+│  │      │  │  │  medici.py
+│  │      │  │  │  megaphone.py
+│  │      │  │  │  megatvcom.py
+│  │      │  │  │  meipai.py
+│  │      │  │  │  melonvod.py
+│  │      │  │  │  metacritic.py
+│  │      │  │  │  mgtv.py
+│  │      │  │  │  microsoftembed.py
+│  │      │  │  │  microsoftstream.py
+│  │      │  │  │  minds.py
+│  │      │  │  │  minoto.py
+│  │      │  │  │  mir24tv.py
+│  │      │  │  │  mirrativ.py
+│  │      │  │  │  mirrorcouk.py
+│  │      │  │  │  mit.py
+│  │      │  │  │  mitele.py
+│  │      │  │  │  mixch.py
+│  │      │  │  │  mixcloud.py
+│  │      │  │  │  mixlr.py
+│  │      │  │  │  mlb.py
+│  │      │  │  │  mlssoccer.py
+│  │      │  │  │  mocha.py
+│  │      │  │  │  mojevideo.py
+│  │      │  │  │  mojvideo.py
+│  │      │  │  │  monstercat.py
+│  │      │  │  │  motherless.py
+│  │      │  │  │  motorsport.py
+│  │      │  │  │  moviepilot.py
+│  │      │  │  │  moview.py
+│  │      │  │  │  moviezine.py
+│  │      │  │  │  movingimage.py
+│  │      │  │  │  msn.py
+│  │      │  │  │  mtv.py
+│  │      │  │  │  muenchentv.py
+│  │      │  │  │  murrtube.py
+│  │      │  │  │  museai.py
+│  │      │  │  │  musescore.py
+│  │      │  │  │  musicdex.py
+│  │      │  │  │  mx3.py
+│  │      │  │  │  mxplayer.py
+│  │      │  │  │  myspace.py
+│  │      │  │  │  myspass.py
+│  │      │  │  │  myvideoge.py
+│  │      │  │  │  myvidster.py
+│  │      │  │  │  mzaalo.py
+│  │      │  │  │  n1.py
+│  │      │  │  │  nate.py
+│  │      │  │  │  nationalgeographic.py
+│  │      │  │  │  naver.py
+│  │      │  │  │  nba.py
+│  │      │  │  │  nbc.py
+│  │      │  │  │  ndr.py
+│  │      │  │  │  ndtv.py
+│  │      │  │  │  nebula.py
+│  │      │  │  │  nekohacker.py
+│  │      │  │  │  nerdcubed.py
+│  │      │  │  │  nest.py
+│  │      │  │  │  neteasemusic.py
+│  │      │  │  │  netverse.py
+│  │      │  │  │  netzkino.py
+│  │      │  │  │  newgrounds.py
+│  │      │  │  │  newspicks.py
+│  │      │  │  │  newsy.py
+│  │      │  │  │  nextmedia.py
+│  │      │  │  │  nexx.py
+│  │      │  │  │  nfb.py
+│  │      │  │  │  nfhsnetwork.py
+│  │      │  │  │  nfl.py
+│  │      │  │  │  nhk.py
+│  │      │  │  │  nhl.py
+│  │      │  │  │  nick.py
+│  │      │  │  │  niconico.py
+│  │      │  │  │  niconicochannelplus.py
+│  │      │  │  │  ninaprotocol.py
+│  │      │  │  │  ninecninemedia.py
+│  │      │  │  │  ninegag.py
+│  │      │  │  │  ninenews.py
+│  │      │  │  │  ninenow.py
+│  │      │  │  │  nintendo.py
+│  │      │  │  │  nitter.py
+│  │      │  │  │  nobelprize.py
+│  │      │  │  │  noice.py
+│  │      │  │  │  nonktube.py
+│  │      │  │  │  noodlemagazine.py
+│  │      │  │  │  nosnl.py
+│  │      │  │  │  nova.py
+│  │      │  │  │  novaplay.py
+│  │      │  │  │  nowness.py
+│  │      │  │  │  noz.py
+│  │      │  │  │  npo.py
+│  │      │  │  │  npr.py
+│  │      │  │  │  nrk.py
+│  │      │  │  │  nrl.py
+│  │      │  │  │  nts.py
+│  │      │  │  │  ntvcojp.py
+│  │      │  │  │  ntvde.py
+│  │      │  │  │  ntvru.py
+│  │      │  │  │  nubilesporn.py
+│  │      │  │  │  nuevo.py
+│  │      │  │  │  nuum.py
+│  │      │  │  │  nuvid.py
+│  │      │  │  │  nytimes.py
+│  │      │  │  │  nzherald.py
+│  │      │  │  │  nzonscreen.py
+│  │      │  │  │  nzz.py
+│  │      │  │  │  odkmedia.py
+│  │      │  │  │  odnoklassniki.py
+│  │      │  │  │  oftv.py
+│  │      │  │  │  oktoberfesttv.py
+│  │      │  │  │  olympics.py
+│  │      │  │  │  on24.py
+│  │      │  │  │  ondemandkorea.py
+│  │      │  │  │  onefootball.py
+│  │      │  │  │  onenewsnz.py
+│  │      │  │  │  oneplace.py
+│  │      │  │  │  onet.py
+│  │      │  │  │  onionstudios.py
+│  │      │  │  │  opencast.py
+│  │      │  │  │  openload.py
+│  │      │  │  │  openrec.py
+│  │      │  │  │  ora.py
+│  │      │  │  │  orf.py
+│  │      │  │  │  outsidetv.py
+│  │      │  │  │  owncloud.py
+│  │      │  │  │  packtpub.py
+│  │      │  │  │  palcomp3.py
+│  │      │  │  │  panopto.py
+│  │      │  │  │  paramountplus.py
+│  │      │  │  │  parler.py
+│  │      │  │  │  parlview.py
+│  │      │  │  │  parti.py
+│  │      │  │  │  patreon.py
+│  │      │  │  │  pbs.py
+│  │      │  │  │  pearvideo.py
+│  │      │  │  │  peekvids.py
+│  │      │  │  │  peertube.py
+│  │      │  │  │  peertv.py
+│  │      │  │  │  peloton.py
+│  │      │  │  │  performgroup.py
+│  │      │  │  │  periscope.py
+│  │      │  │  │  pgatour.py
+│  │      │  │  │  philharmoniedeparis.py
+│  │      │  │  │  phoenix.py
+│  │      │  │  │  photobucket.py
+│  │      │  │  │  pialive.py
+│  │      │  │  │  piapro.py
+│  │      │  │  │  picarto.py
+│  │      │  │  │  piksel.py
+│  │      │  │  │  pinkbike.py
+│  │      │  │  │  pinterest.py
+│  │      │  │  │  piramidetv.py
+│  │      │  │  │  pixivsketch.py
+│  │      │  │  │  pladform.py
+│  │      │  │  │  planetmarathi.py
+│  │      │  │  │  platzi.py
+│  │      │  │  │  playerfm.py
+│  │      │  │  │  playplustv.py
+│  │      │  │  │  playsuisse.py
+│  │      │  │  │  playtvak.py
+│  │      │  │  │  playwire.py
+│  │      │  │  │  pluralsight.py
+│  │      │  │  │  plutotv.py
+│  │      │  │  │  plvideo.py
+│  │      │  │  │  plyr.py
+│  │      │  │  │  podbayfm.py
+│  │      │  │  │  podchaser.py
+│  │      │  │  │  podomatic.py
+│  │      │  │  │  pokergo.py
+│  │      │  │  │  polsatgo.py
+│  │      │  │  │  polskieradio.py
+│  │      │  │  │  popcorntimes.py
+│  │      │  │  │  popcorntv.py
+│  │      │  │  │  pornbox.py
+│  │      │  │  │  pornflip.py
+│  │      │  │  │  pornhub.py
+│  │      │  │  │  pornotube.py
+│  │      │  │  │  pornovoisines.py
+│  │      │  │  │  pornoxo.py
+│  │      │  │  │  pr0gramm.py
+│  │      │  │  │  prankcast.py
+│  │      │  │  │  premiershiprugby.py
+│  │      │  │  │  presstv.py
+│  │      │  │  │  projectveritas.py
+│  │      │  │  │  prosiebensat1.py
+│  │      │  │  │  prx.py
+│  │      │  │  │  puhutv.py
+│  │      │  │  │  puls4.py
+│  │      │  │  │  pyvideo.py
+│  │      │  │  │  qdance.py
+│  │      │  │  │  qingting.py
+│  │      │  │  │  qqmusic.py
+│  │      │  │  │  r7.py
+│  │      │  │  │  radiko.py
+│  │      │  │  │  radiocanada.py
+│  │      │  │  │  radiocomercial.py
+│  │      │  │  │  radiode.py
+│  │      │  │  │  radiofrance.py
+│  │      │  │  │  radiojavan.py
+│  │      │  │  │  radiokapital.py
+│  │      │  │  │  radioradicale.py
+│  │      │  │  │  radiozet.py
+│  │      │  │  │  radlive.py
+│  │      │  │  │  rai.py
+│  │      │  │  │  raywenderlich.py
+│  │      │  │  │  rbgtum.py
+│  │      │  │  │  rcs.py
+│  │      │  │  │  rcti.py
+│  │      │  │  │  rds.py
+│  │      │  │  │  redbee.py
+│  │      │  │  │  redbulltv.py
+│  │      │  │  │  reddit.py
+│  │      │  │  │  redge.py
+│  │      │  │  │  redgifs.py
+│  │      │  │  │  redtube.py
+│  │      │  │  │  rentv.py
+│  │      │  │  │  restudy.py
+│  │      │  │  │  reuters.py
+│  │      │  │  │  reverbnation.py
+│  │      │  │  │  rheinmaintv.py
+│  │      │  │  │  ridehome.py
+│  │      │  │  │  rinsefm.py
+│  │      │  │  │  rmcdecouverte.py
+│  │      │  │  │  rockstargames.py
+│  │      │  │  │  rokfin.py
+│  │      │  │  │  roosterteeth.py
+│  │      │  │  │  rottentomatoes.py
+│  │      │  │  │  roya.py
+│  │      │  │  │  rozhlas.py
+│  │      │  │  │  rte.py
+│  │      │  │  │  rtl2.py
+│  │      │  │  │  rtlnl.py
+│  │      │  │  │  rtnews.py
+│  │      │  │  │  rtp.py
+│  │      │  │  │  rtrfm.py
+│  │      │  │  │  rts.py
+│  │      │  │  │  rtvcplay.py
+│  │      │  │  │  rtve.py
+│  │      │  │  │  rtvs.py
+│  │      │  │  │  rtvslo.py
+│  │      │  │  │  rudovideo.py
+│  │      │  │  │  rule34video.py
+│  │      │  │  │  rumble.py
+│  │      │  │  │  rutube.py
+│  │      │  │  │  rutv.py
+│  │      │  │  │  ruutu.py
+│  │      │  │  │  ruv.py
+│  │      │  │  │  s4c.py
+│  │      │  │  │  safari.py
+│  │      │  │  │  saitosan.py
+│  │      │  │  │  samplefocus.py
+│  │      │  │  │  sapo.py
+│  │      │  │  │  sauceplus.py
+│  │      │  │  │  sbs.py
+│  │      │  │  │  sbscokr.py
+│  │      │  │  │  screen9.py
+│  │      │  │  │  screencast.py
+│  │      │  │  │  screencastify.py
+│  │      │  │  │  screencastomatic.py
+│  │      │  │  │  screenrec.py
+│  │      │  │  │  scrippsnetworks.py
+│  │      │  │  │  scrolller.py
+│  │      │  │  │  scte.py
+│  │      │  │  │  sejmpl.py
+│  │      │  │  │  sen.py
+│  │      │  │  │  senalcolombia.py
+│  │      │  │  │  senategov.py
+│  │      │  │  │  sendtonews.py
+│  │      │  │  │  servus.py
+│  │      │  │  │  sevenplus.py
+│  │      │  │  │  sexu.py
+│  │      │  │  │  seznamzpravy.py
+│  │      │  │  │  shahid.py
+│  │      │  │  │  sharepoint.py
+│  │      │  │  │  sharevideos.py
+│  │      │  │  │  shemaroome.py
+│  │      │  │  │  shiey.py
+│  │      │  │  │  showroomlive.py
+│  │      │  │  │  sibnet.py
+│  │      │  │  │  simplecast.py
+│  │      │  │  │  sina.py
+│  │      │  │  │  sixplay.py
+│  │      │  │  │  skeb.py
+│  │      │  │  │  sky.py
+│  │      │  │  │  skyit.py
+│  │      │  │  │  skylinewebcams.py
+│  │      │  │  │  skynewsarabia.py
+│  │      │  │  │  skynewsau.py
+│  │      │  │  │  slideshare.py
+│  │      │  │  │  slideslive.py
+│  │      │  │  │  slutload.py
+│  │      │  │  │  smotrim.py
+│  │      │  │  │  snapchat.py
+│  │      │  │  │  snotr.py
+│  │      │  │  │  softwhiteunderbelly.py
+│  │      │  │  │  sohu.py
+│  │      │  │  │  sonyliv.py
+│  │      │  │  │  soundcloud.py
+│  │      │  │  │  soundgasm.py
+│  │      │  │  │  southpark.py
+│  │      │  │  │  sovietscloset.py
+│  │      │  │  │  spankbang.py
+│  │      │  │  │  spiegel.py
+│  │      │  │  │  spike.py
+│  │      │  │  │  sport5.py
+│  │      │  │  │  sportbox.py
+│  │      │  │  │  sportdeutschland.py
+│  │      │  │  │  spotify.py
+│  │      │  │  │  spreaker.py
+│  │      │  │  │  springboardplatform.py
+│  │      │  │  │  sproutvideo.py
+│  │      │  │  │  srgssr.py
+│  │      │  │  │  srmediathek.py
+│  │      │  │  │  stacommu.py
+│  │      │  │  │  stageplus.py
+│  │      │  │  │  stanfordoc.py
+│  │      │  │  │  startrek.py
+│  │      │  │  │  startv.py
+│  │      │  │  │  steam.py
+│  │      │  │  │  stitcher.py
+│  │      │  │  │  storyfire.py
+│  │      │  │  │  streaks.py
+│  │      │  │  │  streamable.py
+│  │      │  │  │  streamcz.py
+│  │      │  │  │  streetvoice.py
+│  │      │  │  │  stretchinternet.py
+│  │      │  │  │  stripchat.py
+│  │      │  │  │  stv.py
+│  │      │  │  │  subsplash.py
+│  │      │  │  │  substack.py
+│  │      │  │  │  sunporno.py
+│  │      │  │  │  sverigesradio.py
+│  │      │  │  │  svt.py
+│  │      │  │  │  swearnet.py
+│  │      │  │  │  syvdk.py
+│  │      │  │  │  sztvhu.py
+│  │      │  │  │  tagesschau.py
+│  │      │  │  │  taptap.py
+│  │      │  │  │  tass.py
+│  │      │  │  │  tbs.py
+│  │      │  │  │  tbsjp.py
+│  │      │  │  │  teachable.py
+│  │      │  │  │  teachertube.py
+│  │      │  │  │  teachingchannel.py
+│  │      │  │  │  teamcoco.py
+│  │      │  │  │  teamtreehouse.py
+│  │      │  │  │  ted.py
+│  │      │  │  │  tele13.py
+│  │      │  │  │  tele5.py
+│  │      │  │  │  telebruxelles.py
+│  │      │  │  │  telecaribe.py
+│  │      │  │  │  telecinco.py
+│  │      │  │  │  telegraaf.py
+│  │      │  │  │  telegram.py
+│  │      │  │  │  telemb.py
+│  │      │  │  │  telemundo.py
+│  │      │  │  │  telequebec.py
+│  │      │  │  │  teletask.py
+│  │      │  │  │  telewebion.py
+│  │      │  │  │  tempo.py
+│  │      │  │  │  tencent.py
+│  │      │  │  │  tennistv.py
+│  │      │  │  │  tenplay.py
+│  │      │  │  │  testurl.py
+│  │      │  │  │  tf1.py
+│  │      │  │  │  tfo.py
+│  │      │  │  │  theguardian.py
+│  │      │  │  │  thehighwire.py
+│  │      │  │  │  theholetv.py
+│  │      │  │  │  theintercept.py
+│  │      │  │  │  theplatform.py
+│  │      │  │  │  thestar.py
+│  │      │  │  │  thesun.py
+│  │      │  │  │  theweatherchannel.py
+│  │      │  │  │  thisamericanlife.py
+│  │      │  │  │  thisoldhouse.py
+│  │      │  │  │  thisvid.py
+│  │      │  │  │  threeqsdn.py
+│  │      │  │  │  threespeak.py
+│  │      │  │  │  tiktok.py
+│  │      │  │  │  tmz.py
+│  │      │  │  │  tnaflix.py
+│  │      │  │  │  toggle.py
+│  │      │  │  │  toggo.py
+│  │      │  │  │  tonline.py
+│  │      │  │  │  toongoggles.py
+│  │      │  │  │  toutiao.py
+│  │      │  │  │  toutv.py
+│  │      │  │  │  toypics.py
+│  │      │  │  │  traileraddict.py
+│  │      │  │  │  triller.py
+│  │      │  │  │  trovo.py
+│  │      │  │  │  trtcocuk.py
+│  │      │  │  │  trtworld.py
+│  │      │  │  │  trueid.py
+│  │      │  │  │  trunews.py
+│  │      │  │  │  truth.py
+│  │      │  │  │  tube8.py
+│  │      │  │  │  tubetugraz.py
+│  │      │  │  │  tubitv.py
+│  │      │  │  │  tumblr.py
+│  │      │  │  │  tunein.py
+│  │      │  │  │  turner.py
+│  │      │  │  │  tv2.py
+│  │      │  │  │  tv24ua.py
+│  │      │  │  │  tv2dk.py
+│  │      │  │  │  tv2hu.py
+│  │      │  │  │  tv4.py
+│  │      │  │  │  tv5mondeplus.py
+│  │      │  │  │  tv5unis.py
+│  │      │  │  │  tva.py
+│  │      │  │  │  tvanouvelles.py
+│  │      │  │  │  tvc.py
+│  │      │  │  │  tver.py
+│  │      │  │  │  tvigle.py
+│  │      │  │  │  tviplayer.py
+│  │      │  │  │  tvland.py
+│  │      │  │  │  tvn24.py
+│  │      │  │  │  tvnoe.py
+│  │      │  │  │  tvopengr.py
+│  │      │  │  │  tvp.py
+│  │      │  │  │  tvplay.py
+│  │      │  │  │  tvplayer.py
+│  │      │  │  │  tvw.py
+│  │      │  │  │  tweakers.py
+│  │      │  │  │  twentymin.py
+│  │      │  │  │  twentythreevideo.py
+│  │      │  │  │  twitcasting.py
+│  │      │  │  │  twitch.py
+│  │      │  │  │  twitter.py
+│  │      │  │  │  txxx.py
+│  │      │  │  │  udemy.py
+│  │      │  │  │  udn.py
+│  │      │  │  │  ufctv.py
+│  │      │  │  │  ukcolumn.py
+│  │      │  │  │  uktvplay.py
+│  │      │  │  │  uliza.py
+│  │      │  │  │  umg.py
+│  │      │  │  │  unistra.py
+│  │      │  │  │  unitednations.py
+│  │      │  │  │  unity.py
+│  │      │  │  │  unsupported.py
+│  │      │  │  │  uol.py
+│  │      │  │  │  uplynk.py
+│  │      │  │  │  urort.py
+│  │      │  │  │  urplay.py
+│  │      │  │  │  usanetwork.py
+│  │      │  │  │  usatoday.py
+│  │      │  │  │  ustream.py
+│  │      │  │  │  ustudio.py
+│  │      │  │  │  utreon.py
+│  │      │  │  │  varzesh3.py
+│  │      │  │  │  vbox7.py
+│  │      │  │  │  veo.py
+│  │      │  │  │  vesti.py
+│  │      │  │  │  vevo.py
+│  │      │  │  │  vgtv.py
+│  │      │  │  │  vh1.py
+│  │      │  │  │  vice.py
+│  │      │  │  │  viddler.py
+│  │      │  │  │  videa.py
+│  │      │  │  │  videocampus_sachsen.py
+│  │      │  │  │  videodetective.py
+│  │      │  │  │  videofyme.py
+│  │      │  │  │  videoken.py
+│  │      │  │  │  videomore.py
+│  │      │  │  │  videopress.py
+│  │      │  │  │  vidflex.py
+│  │      │  │  │  vidio.py
+│  │      │  │  │  vidlii.py
+│  │      │  │  │  vidly.py
+│  │      │  │  │  vidyard.py
+│  │      │  │  │  viewlift.py
+│  │      │  │  │  viidea.py
+│  │      │  │  │  vimeo.py
+│  │      │  │  │  vimm.py
+│  │      │  │  │  viously.py
+│  │      │  │  │  viqeo.py
+│  │      │  │  │  viu.py
+│  │      │  │  │  vk.py
+│  │      │  │  │  vocaroo.py
+│  │      │  │  │  vodpl.py
+│  │      │  │  │  vodplatform.py
+│  │      │  │  │  voicy.py
+│  │      │  │  │  volejtv.py
+│  │      │  │  │  voxmedia.py
+│  │      │  │  │  vrsquare.py
+│  │      │  │  │  vrt.py
+│  │      │  │  │  vtm.py
+│  │      │  │  │  vtv.py
+│  │      │  │  │  vuclip.py
+│  │      │  │  │  vvvvid.py
+│  │      │  │  │  walla.py
+│  │      │  │  │  washingtonpost.py
+│  │      │  │  │  wat.py
+│  │      │  │  │  wdr.py
+│  │      │  │  │  webcamerapl.py
+│  │      │  │  │  webcaster.py
+│  │      │  │  │  webofstories.py
+│  │      │  │  │  weibo.py
+│  │      │  │  │  weiqitv.py
+│  │      │  │  │  weverse.py
+│  │      │  │  │  wevidi.py
+│  │      │  │  │  weyyak.py
+│  │      │  │  │  whowatch.py
+│  │      │  │  │  whyp.py
+│  │      │  │  │  wikimedia.py
+│  │      │  │  │  wimbledon.py
+│  │      │  │  │  wimtv.py
+│  │      │  │  │  wistia.py
+│  │      │  │  │  wordpress.py
+│  │      │  │  │  worldstarhiphop.py
+│  │      │  │  │  wppilot.py
+│  │      │  │  │  wrestleuniverse.py
+│  │      │  │  │  wsj.py
+│  │      │  │  │  wwe.py
+│  │      │  │  │  wykop.py
+│  │      │  │  │  xanimu.py
+│  │      │  │  │  xboxclips.py
+│  │      │  │  │  xhamster.py
+│  │      │  │  │  xiaohongshu.py
+│  │      │  │  │  ximalaya.py
+│  │      │  │  │  xinpianchang.py
+│  │      │  │  │  xminus.py
+│  │      │  │  │  xnxx.py
+│  │      │  │  │  xstream.py
+│  │      │  │  │  xvideos.py
+│  │      │  │  │  xxxymovies.py
+│  │      │  │  │  yahoo.py
+│  │      │  │  │  yandexdisk.py
+│  │      │  │  │  yandexmusic.py
+│  │      │  │  │  yandexvideo.py
+│  │      │  │  │  yapfiles.py
+│  │      │  │  │  yappy.py
+│  │      │  │  │  yle_areena.py
+│  │      │  │  │  youjizz.py
+│  │      │  │  │  youku.py
+│  │      │  │  │  younow.py
+│  │      │  │  │  youporn.py
+│  │      │  │  │  zaiko.py
+│  │      │  │  │  zapiks.py
+│  │      │  │  │  zattoo.py
+│  │      │  │  │  zdf.py
+│  │      │  │  │  zee5.py
+│  │      │  │  │  zeenews.py
+│  │      │  │  │  zenporn.py
+│  │      │  │  │  zetland.py
+│  │      │  │  │  zhihu.py
+│  │      │  │  │  zingmp3.py
+│  │      │  │  │  zoom.py
+│  │      │  │  │  zype.py
+│  │      │  │  │  _extractors.py
+│  │      │  │  │  __init__.py
+│  │      │  │  │  
+│  │      │  │  └─youtube
+│  │      │  │      │  _base.py
+│  │      │  │      │  _clip.py
+│  │      │  │      │  _mistakes.py
+│  │      │  │      │  _notifications.py
+│  │      │  │      │  _redirect.py
+│  │      │  │      │  _search.py
+│  │      │  │      │  _tab.py
+│  │      │  │      │  _video.py
+│  │      │  │      │  __init__.py
+│  │      │  │      │  
+│  │      │  │      └─pot
+│  │      │  │          │  cache.py
+│  │      │  │          │  provider.py
+│  │      │  │          │  README.md
+│  │      │  │          │  utils.py
+│  │      │  │          │  _director.py
+│  │      │  │          │  _provider.py
+│  │      │  │          │  _registry.py
+│  │      │  │          │  __init__.py
+│  │      │  │          │  
+│  │      │  │          └─_builtin
+│  │      │  │                  memory_cache.py
+│  │      │  │                  webpo_cachespec.py
+│  │      │  │                  __init__.py
+│  │      │  │                  
+│  │      │  ├─networking
+│  │      │  │      common.py
+│  │      │  │      exceptions.py
+│  │      │  │      impersonate.py
+│  │      │  │      websocket.py
+│  │      │  │      _curlcffi.py
+│  │      │  │      _helper.py
+│  │      │  │      _requests.py
+│  │      │  │      _urllib.py
+│  │      │  │      _websockets.py
+│  │      │  │      __init__.py
+│  │      │  │      
+│  │      │  ├─postprocessor
+│  │      │  │      common.py
+│  │      │  │      embedthumbnail.py
+│  │      │  │      exec.py
+│  │      │  │      ffmpeg.py
+│  │      │  │      metadataparser.py
+│  │      │  │      modify_chapters.py
+│  │      │  │      movefilesafterdownload.py
+│  │      │  │      sponskrub.py
+│  │      │  │      sponsorblock.py
+│  │      │  │      xattrpp.py
+│  │      │  │      __init__.py
+│  │      │  │      
+│  │      │  ├─utils
+│  │      │  │  │  networking.py
+│  │      │  │  │  progress.py
+│  │      │  │  │  traversal.py
+│  │      │  │  │  _deprecated.py
+│  │      │  │  │  _legacy.py
+│  │      │  │  │  _utils.py
+│  │      │  │  │  __init__.py
+│  │      │  │  │  
+│  │      │  │  └─jslib
+│  │      │  │          devalue.py
+│  │      │  │          __init__.py
+│  │      │  │          
+│  │      │  └─__pyinstaller
+│  │      │          hook-yt_dlp.py
+│  │      │          __init__.py
+│  │      │          
+│  │      ├─yt_dlp-2025.8.11.dist-info
+│  │      │  │  entry_points.txt
+│  │      │  │  INSTALLER
+│  │      │  │  METADATA
+│  │      │  │  RECORD
+│  │      │  │  REQUESTED
+│  │      │  │  WHEEL
+│  │      │  │  
+│  │      │  └─licenses
+│  │      │          AUTHORS
+│  │      │          LICENSE
+│  │      │          
+│  │      └─_distutils_hack
+│  │          │  override.py
+│  │          │  __init__.py
+│  │          │  
+│  │          └─__pycache__
+│  │                  __init__.cpython-310.pyc
+│  │                  
+│  ├─Scripts
+│  │      activate
+│  │      activate.bat
+│  │      Activate.ps1
+│  │      deactivate.bat
+│  │      pip.exe
+│  │      pip3.10.exe
+│  │      pip3.exe
+│  │      playwright.exe
+│  │      python.exe
+│  │      pythonw.exe
+│  │      yt-dlp.exe
+│  │      
+│  └─share
+│      ├─bash-completion
+│      │  └─completions
+│      │          yt-dlp
+│      │          
+│      ├─doc
+│      │  └─yt_dlp
+│      │          README.txt
+│      │          
+│      ├─fish
+│      │  └─vendor_completions.d
+│      │          yt-dlp.fish
+│      │          
+│      ├─man
+│      │  └─man1
+│      │          yt-dlp.1
+│      │          
+│      └─zsh
+│          └─site-functions
+│                  _yt-dlp
+│                  
+└─__pycache__
+        facade.cpython-310.pyc
+        facade.cpython-313.pyc
+        tc_recorder_core.cpython-310.pyc
+        tc_recorder_core.cpython-313.pyc
+        

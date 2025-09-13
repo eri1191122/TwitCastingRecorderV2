@@ -2,172 +2,210 @@
 # -*- coding: utf-8 -*-
 """
 Monitor CLI for TwitCasting Recorder
-コマンドライン制御
-重大バグ修正版
-- URL正規化統一
-- ディレクトリ作成保証
-- config.json読み込みエラー処理
+監視機能のCLIインターフェース（統合版）
+- ProactorEventLoop対応
+- AUTH_REQUIRED明確化
+- ログイン誘導実装
 """
 import asyncio
+import argparse
 import json
 import sys
-import signal
 from pathlib import Path
-from typing import List
-import argparse
-import tempfile
+from datetime import datetime
 
-# Windows EventLoop設定（最初に実行）
+# Windows EventLoop設定（Proactor必須・最優先）
 if sys.platform == "win32":
-    asyncio.set_event_loop_policy(asyncio.WindowsSelectorEventLoopPolicy())
+    asyncio.set_event_loop_policy(asyncio.WindowsProactorEventLoopPolicy())
 
-# 親ディレクトリをパスに追加
+# パス設定
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
-# targets.json初期化
-TARGETS_FILE = ROOT / "auto" / "targets.json"
-if not TARGETS_FILE.exists():
-    TARGETS_FILE.parent.mkdir(parents=True, exist_ok=True)
-    TARGETS_FILE.write_text('{"urls": [], "updated_at": null}', encoding="utf-8")
-
-from auto.monitor_engine import MonitorEngine
 from auto.live_detector import LiveDetector
+from auto.monitor_engine import MonitorEngine
 
-# パス定義
-HEARTBEAT_FILE = ROOT / "logs" / "heartbeat.json"
+# ファイルパス定義
+TARGETS_FILE = ROOT / "auto" / "targets.json"
+CONFIG_FILE = ROOT / "config.json"
+
 
 class MonitorCLI:
-    """CLIコントローラー"""
+    """監視CLIクラス"""
     
     def __init__(self):
+        self.detector = LiveDetector()
         self.engine = None
-        self.task = None
         
-    def _normalize_url(self, url: str) -> str:
-        """URL正規化（Engine/Detectorと統一）"""
-        u = str(url).strip()
-        if u.startswith(("c:", "g:", "ig:")):
-            return f"https://twitcasting.tv/{u}"  # 接頭辞を残す
-        if u.startswith(("http://", "https://")):
-            return u
-        return f"https://twitcasting.tv/{u}"
-        
-    def _load_targets(self) -> dict:
-        """targets.json読み込み"""
+    def load_targets(self):
+        """監視対象リスト読み込み（BOM対応）"""
         if not TARGETS_FILE.exists():
-            return {"urls": [], "updated_at": None}
-        try:
-            return json.loads(TARGETS_FILE.read_text(encoding="utf-8"))
-        except Exception:
-            return {"urls": [], "updated_at": None}
-            
-    def _save_targets(self, data: dict):
-        """targets.json保存（atomic write）"""
-        # 親ディレクトリ作成
-        TARGETS_FILE.parent.mkdir(parents=True, exist_ok=True)
+            return []
         
-        # 更新日時追加
-        from datetime import datetime
-        data["updated_at"] = datetime.now().isoformat()
-        
-        # atomic write
         try:
-            temp_file = TARGETS_FILE.with_suffix(".tmp")
-            temp_file.write_text(
-                json.dumps(data, ensure_ascii=False, indent=2),
-                encoding="utf-8"
-            )
-            temp_file.replace(TARGETS_FILE)
-            print(f"[CLI] Saved {len(data['urls'])} targets")
+            with open(TARGETS_FILE, "r", encoding="utf-8-sig") as f:
+                data = json.load(f)
+                return data.get("urls", [])
         except Exception as e:
-            print(f"[ERROR] Save failed: {e}")
-            
-    def add_url(self, url: str):
-        """URL追加（正規化して保存）"""
-        data = self._load_targets()
-        normalized = self._normalize_url(url)
+            print(f"[ERROR] Failed to load targets: {e}")
+            return []
+    
+    def save_targets(self, urls):
+        """監視対象リスト保存（atomic write）"""
+        data = {
+            "urls": urls,
+            "updated_at": datetime.now().isoformat()
+        }
         
-        # 重複チェック
-        if normalized in data["urls"]:
-            print(f"[CLI] Already exists: {url}")
+        try:
+            TARGETS_FILE.parent.mkdir(parents=True, exist_ok=True)
+            # atomic write
+            temp_file = TARGETS_FILE.with_suffix(".tmp")
+            with open(temp_file, "w", encoding="utf-8") as f:
+                json.dump(data, f, ensure_ascii=False, indent=2)
+            temp_file.replace(TARGETS_FILE)
+            return True
+        except Exception as e:
+            print(f"[ERROR] Failed to save targets: {e}")
+            return False
+    
+    async def list_targets(self):
+        """監視対象一覧表示"""
+        urls = self.load_targets()
+        
+        if not urls:
+            print("No monitoring targets configured.")
             return
-            
-        data["urls"].append(normalized)  # 正規化したものを保存
-        self._save_targets(data)
-        print(f"[CLI] Added: {normalized}")
         
-    def remove_url(self, url: str):
-        """URL削除（正規化して削除）"""
-        data = self._load_targets()
-        normalized = self._normalize_url(url)
+        print(f"=== Monitoring Targets ({len(urls)}) ===")
+        for url in urls:
+            display_id = url.replace("https://twitcasting.tv/", "")
+            print(f"  • {display_id}")
+    
+    async def add_target(self, target):
+        """監視対象追加"""
+        # URL正規化
+        if not target.startswith("http"):
+            target = f"https://twitcasting.tv/{target}"
         
-        if normalized in data["urls"]:
-            data["urls"].remove(normalized)
-            self._save_targets(data)
-            print(f"[CLI] Removed: {normalized}")
+        # c:プレフィックス削除
+        if "twitcasting.tv/c:" in target:
+            target = target.replace("/c:", "/")
+        
+        urls = self.load_targets()
+        
+        if target in urls:
+            print(f"[INFO] Already exists: {target}")
+            return
+        
+        urls.append(target)
+        
+        if self.save_targets(urls):
+            print(f"[SUCCESS] Added: {target}")
         else:
-            print(f"[CLI] Not found: {url}")
-            
-    def list_urls(self):
-        """URL一覧表示"""
-        data = self._load_targets()
+            print(f"[ERROR] Failed to add: {target}")
+    
+    async def remove_target(self, target):
+        """監視対象削除"""
+        # URL正規化
+        if not target.startswith("http"):
+            target = f"https://twitcasting.tv/{target}"
         
-        print(f"\n=== Monitoring Targets ({len(data['urls'])}) ===")
-        for i, url in enumerate(data["urls"], 1):
-            print(f"{i:2}. {url}")
-            
-        if data.get("updated_at"):
-            print(f"\nLast updated: {data['updated_at']}")
-            
-        # heartbeat情報も表示
-        if HEARTBEAT_FILE.exists():
-            try:
-                hb = json.loads(HEARTBEAT_FILE.read_text(encoding="utf-8"))
-                print(f"\n=== Monitor Status ===")
-                print(f"Phase: {hb.get('phase', 'unknown')}")
-                print(f"Active jobs: {hb.get('active_jobs', 0)}")
-                if hb.get("active_urls"):
-                    print(f"Recording: {', '.join(hb['active_urls'])}")
-                print(f"Disk free: {hb.get('disk_free_gb', 0)}GB")
-            except Exception:
-                pass
-                
-    async def check_url(self, url: str):
-        """URL状態チェック"""
-        print(f"[CLI] Checking: {url}")
+        urls = self.load_targets()
         
-        async with LiveDetector() as detector:
-            result = await detector.check_live_status(url)
-            
+        if target not in urls:
+            print(f"[INFO] Not found: {target}")
+            return
+        
+        urls.remove(target)
+        
+        if self.save_targets(urls):
+            print(f"[SUCCESS] Removed: {target}")
+        else:
+            print(f"[ERROR] Failed to remove: {target}")
+    
+    async def check_target(self, target):
+        """
+        個別配信チェック（AUTH_REQUIRED明確化）
+        """
+        # URL正規化
+        if not target.startswith("http"):
+            target = f"https://twitcasting.tv/{target}"
+        
+        print(f"[CLI] Checking: {target}")
+        
+        # 互換I/F（check_live）を必ず使用
+        result = await self.detector.check_live(target)
+        
+        # 結果表示（AUTH_REQUIREDを最優先で判定）
+        if result.get("is_live"):
+            print(f"🔴 LIVE: {result.get('movie_id', 'unknown')}")
+            print(f"   Detail: {result.get('detail', '')}")
+        else:
+            reason = result.get("reason", "UNKNOWN")
+            if reason == "AUTH_REQUIRED":
+                print(f"🔒 AUTH_REQUIRED: {result.get('detail', 'ログインが必要')}")
+                print("   → メン限/グル限の可能性があります")
+                print("   → 以下のコマンドでログインしてください：")
+                print("     python do_login.py")
+                print("   → ログイン後に再度このコマンドを実行してください")
+            elif reason == "NOT_LIVE":
+                print(f"⚫ OFFLINE: 配信していません")
+                print(f"   Detail: {result.get('detail', '')}")
+            elif reason in ["NOT_FOUND", "USER_NOT_FOUND", "PAGE_NOT_FOUND"]:
+                print(f"❌ NOT_FOUND: {result.get('detail', 'ページ/ユーザーが見つかりません')}")
+            else:
+                print(f"⚠️ {reason}: {result.get('detail', '')}")
+        
+        # JSON出力（reason握りつぶさない）
+        print("\n[JSON Result]")
         print(json.dumps(result, ensure_ascii=False, indent=2))
         
+        return result
+    
     async def start_monitoring(self):
-        """監視開始（Ctrl+C対応）"""
+        """監視開始"""
         print("[CLI] Starting monitor...")
         
-        # シグナルハンドラー設定
-        def signal_handler(sig, frame):
-            print("\n[CLI] Stopping (Ctrl+C)...")
-            if self.task:
-                self.task.cancel()
-                
-        signal.signal(signal.SIGINT, signal_handler)
+        # 設定読み込み（BOM対応）
+        config = {}
+        if CONFIG_FILE.exists():
+            try:
+                with open(CONFIG_FILE, "r", encoding="utf-8-sig") as f:
+                    config = json.load(f)
+            except Exception as e:
+                print(f"[WARN] Config load error: {e}")
+        
+        # 監視有効チェック（新旧両対応）
+        monitor_config = config.get("monitor", {})
+        monitor_enabled = (
+            monitor_config.get("enable", False) or 
+            config.get("enable_monitoring", False)
+        )
+        
+        if not monitor_enabled:
+            print("[ERROR] Monitoring is disabled in config.json")
+            print("       Set monitor.enable = true to enable")
+            print("       (or enable_monitoring = true for old version)")
+            return
         
         # エンジン起動
-        self.engine = MonitorEngine()
+        self.engine = MonitorEngine(config)
         
         try:
-            self.task = asyncio.create_task(self.engine.watch_and_record())
-            await self.task
-        except asyncio.CancelledError:
-            print("[CLI] Cancelled")
-        except Exception as e:
-            print(f"[ERROR] {e}")
-        finally:
+            await self.engine.start()
+        except KeyboardInterrupt:
+            print("\n[CLI] Stopping monitor...")
             if self.engine:
                 await self.engine.stop()
-            print("[CLI] Stopped")
+            print("[CLI] Monitor stopped")
+        except Exception as e:
+            print(f"[ERROR] Monitor error: {e}")
+            import traceback
+            traceback.print_exc()
+            if self.engine:
+                await self.engine.stop()
+
 
 async def main():
     parser = argparse.ArgumentParser(
@@ -175,56 +213,47 @@ async def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  %(prog)s --add https://twitcasting.tv/user_id
-  %(prog)s --add c:user_id
-  %(prog)s --add g:group_id
-  %(prog)s --add ig:item_id
-  %(prog)s --remove user_id
-  %(prog)s --list
-  %(prog)s --check https://twitcasting.tv/user_id
-  %(prog)s --start
+  python auto/monitor_cli.py --list
+  python auto/monitor_cli.py --add icchy8591
+  python auto/monitor_cli.py --check nodasori2525
+  python auto/monitor_cli.py --start
         """
     )
-    
+    parser.add_argument("--list", action="store_true", help="List monitoring targets")
     parser.add_argument("--add", metavar="URL", help="Add monitoring target")
-    parser.add_argument("--remove", metavar="URL", help="Remove target")
-    parser.add_argument("--list", action="store_true", help="List targets")
+    parser.add_argument("--remove", metavar="URL", help="Remove monitoring target")
     parser.add_argument("--check", metavar="URL", help="Check live status")
     parser.add_argument("--start", action="store_true", help="Start monitoring")
-    parser.add_argument("--clear", action="store_true", help="Clear all targets")
     
     args = parser.parse_args()
+    
     cli = MonitorCLI()
     
-    # コマンド実行
-    if args.add:
-        cli.add_url(args.add)
-    elif args.remove:
-        cli.remove_url(args.remove)
-    elif args.list:
-        cli.list_urls()
-    elif args.clear:
-        cli._save_targets({"urls": []})
-        print("[CLI] All targets cleared")
-    elif args.check:
-        await cli.check_url(args.check)
-    elif args.start:
-        # 設定確認（エラー処理追加）
-        config_path = ROOT / "config.json"
-        try:
-            config = json.loads(config_path.read_text(encoding="utf-8"))
-        except Exception as e:
-            print(f"[ERROR] Failed to read config.json: {e}")
-            return
-            
-        if not config.get("enable_monitoring"):
-            print("[ERROR] Monitoring disabled in config.json")
-            print("Set 'enable_monitoring': true to enable")
-            return
-            
-        await cli.start_monitoring()
-    else:
-        parser.print_help()
+    try:
+        if args.list:
+            await cli.list_targets()
+        elif args.add:
+            await cli.add_target(args.add)
+        elif args.remove:
+            await cli.remove_target(args.remove)
+        elif args.check:
+            await cli.check_target(args.check)
+        elif args.start:
+            await cli.start_monitoring()
+        else:
+            parser.print_help()
+    except Exception as e:
+        print(f"[FATAL] Unexpected error: {e}")
+        import traceback
+        traceback.print_exc()
+        sys.exit(1)
+
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    try:
+        asyncio.run(main())
+    except KeyboardInterrupt:
+        print("\n[CLI] Interrupted by user")
+    except Exception as e:
+        print(f"[FATAL] {e}")
+        sys.exit(1)

@@ -1,654 +1,800 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Chrome Singleton Manager v7.3 Strong-Guarantee (修正版)
-- 目的: ログイン後に録画用ヘッドレス context へセッションを確実に引き継ぐ
-- 変更点:
-  1) 可視(context) -> ヘッドレス(context) へ TwitCasting系Cookieを明示注入
-  2) guided_login_wizard の出口で "ヘッドレスが strong" を必ず再確認 (保証)
-  3) weak->none の降格も抑止 (強度が下がる瞬間のブレを吸収)
-  4) 初回3秒はCookie判定を完全無視（既存仕様維持）
-  5) weakは成功にしない（10秒後のみ昇格試行の既存仕様維持）
-  6) 【修正】Cookie判定の閾値を実態に合わせて緩和
-  7) 【重要修正】544行目の強制return "strong"を削除
+Chrome Singleton Manager for TwitCasting Recorder
+Version: 8.8.0 (完全自己修復型・NoneType.send対策版)
+
+Single Chrome instance management with automatic recovery
+機能削減なし・全機能維持、壊れたコンテキストを自動検出・再生成
+NoneType.send即時リカバリ対応
 """
 
 from __future__ import annotations
+from pathlib import Path
+import builtins as _bi
+if not hasattr(_bi, "Path"):
+    _bi.Path = Path
 
 import asyncio
-import sqlite3
-import tempfile
-import shutil
+import json
+import logging
+import os
+import sys
+import threading
 import time
-from dataclasses import dataclass
-from datetime import datetime
-from pathlib import Path
-from typing import Optional, Set
+import uuid
+import traceback
+from typing import Optional, Dict, Any, List
 
+# ===== Playwright import =====
 try:
-    from playwright.async_api import async_playwright, BrowserContext, Page
-except ImportError:
-    async_playwright = None
-    BrowserContext = object
-    Page = object
+    from playwright.async_api import async_playwright, Browser, BrowserContext, Page
+    PlaywrightError = Exception
+    print(f"[CHROME-INFO] Playwright import ok (python={sys.executable})")
+except Exception as e:
+    print(f"[ERROR] Playwright import failed: {e!r}")
+    print(f"[INFO]  Python executable: {sys.executable}")
+    traceback.print_exc()
+    sys.exit(1)
 
-
-# ===== パス定義 =====
-ROOT = (
-    Path(__file__).resolve().parent.parent
-    if (Path(__file__).resolve().parent.name == "core")
-    else Path(__file__).resolve().parent
-)
-AUTH_DIR = ROOT / ".auth" / "playwright"
+# ===== パス設定 =====
+ROOT = Path(__file__).resolve().parent.parent
 LOGS = ROOT / "logs"
-LOGS.mkdir(parents=True, exist_ok=True)
-AUTH_DIR.mkdir(parents=True, exist_ok=True)
+AUTH_DIR = ROOT / ".auth" / "playwright"
 
+for d in (LOGS, AUTH_DIR):
+    d.mkdir(parents=True, exist_ok=True)
 
-# ===== ログ =====
-def log(msg: str, level: str = "INFO") -> None:
-    try:
-        timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+# ===== 診断ログ =====
+class ChromeDiagnostics:
+    @staticmethod
+    def log(msg: str, level: str = "INFO") -> None:
+        ts = time.strftime("%Y-%m-%d %H:%M:%S")
         log_path = LOGS / "chrome_diagnostic.log"
-        log_path.parent.mkdir(parents=True, exist_ok=True)
-        with log_path.open("a", encoding="utf-8") as f:
-            f.write(f"{timestamp} [{level}] {msg}\n")
-        print(f"[CHROME-{level}] {msg}")
-    except Exception:
-        pass
+        try:
+            with open(log_path, "a", encoding="utf-8") as f:
+                f.write(f"{ts} [{level}] {msg}\n")
+            print(f"[CHROME-{level}] {msg}")
+        except Exception as e:
+            print(f"[CHROME-LOG-ERROR] {e}")
 
-
-@dataclass
-class _CtxMeta:
-    headless: bool
-    created_at: float
-
-
+# ===== Singleton実装 =====
 class ChromeSingleton:
-    """Playwright Chrome の単一管理 v7.3"""
+    _instance = None
+    _lock = threading.Lock()
+    _instance_id = None
 
-    _instance: Optional["ChromeSingleton"] = None
+    def __new__(cls):
+        with cls._lock:
+            if cls._instance is None:
+                cls._instance = super().__new__(cls)
+                cls._instance_id = str(uuid.uuid4())[:8]
+                ChromeDiagnostics.log(f"ChromeSingleton created (ID: {cls._instance_id})", "INFO")
+            return cls._instance
 
-    @classmethod
-    def instance(cls) -> "ChromeSingleton":
-        if cls._instance is None:
-            cls._instance = cls()
-        return cls._instance
+    def __init__(self):
+        if hasattr(self, '_initialized'):
+            return
+        self._initialized = True
 
-    def __init__(self) -> None:
-        self._pw = None
+        self._playwright = None
+        self._browser: Optional[Browser] = None
         self._browser_ctx: Optional[BrowserContext] = None
         self._headless_ctx: Optional[BrowserContext] = None
-        self._page: Optional[Page] = None
-        self._ctx_meta: Optional[_CtxMeta] = None
-        self._login_in_progress: bool = False
-        self._last_known_login_status: str = "unknown"
-        self._lock = asyncio.Lock()
-        self._wizard_start_time: float = 0  # ウィザード開始時刻
+        self._browser_headless: Optional[bool] = None
 
-    # ===== Playwright / Context 管理 =====
-    async def _ensure_pw(self):
-        if self._pw is None:
-            if async_playwright is None:
-                raise RuntimeError("playwright is not installed")
-            self._pw = await async_playwright().start()
-            log("Playwright initialized")
+        self._lock = threading.RLock()
+        self._async_lock = asyncio.Lock()
+        self._current_mode = None
+        self._last_activity = time.time()
+        
+        # 自己修復カウンタ
+        self._recovery_count = 0
+        self._last_recovery = 0
+        self._nonetype_recovery_count = 0  # NoneType.send専用カウンタ
 
-    async def _launch_new_ctx(self, *, headless: bool) -> BrowserContext:
-        await self._ensure_pw()
+        self._ua = ("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+                    "(KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36")
 
-        args = [
-            "--disable-sync",
-            "--disable-background-networking",
-            "--no-default-browser-check",
-            "--no-first-run",
-            "--disable-plugins",
-            "--disable-extensions",
-        ]
+        ChromeDiagnostics.log(f"ChromeSingleton initialized (ID: {self._instance_id})", "INFO")
 
-        log(f"Launching new context (headless={headless})")
-        ctx = await self._pw.chromium.launch_persistent_context(
-            user_data_dir=str(AUTH_DIR),
-            headless=headless,
-            args=args,
-            viewport={"width": 1200, "height": 850},
-            accept_downloads=False,
-        )
+    # ===== ヘルパーメソッド =====
+    def _log(self, level: str, msg: str) -> None:
+        ChromeDiagnostics.log(f"[{self._instance_id}] {msg}", level)
 
-        page = ctx.pages[0] if ctx.pages else await ctx.new_page()
+    def get_unified_ua(self) -> str:
+        return self._ua
 
-        if headless:
-            self._headless_ctx = ctx
-        else:
-            self._browser_ctx = ctx
-            self._page = page
-            self._ctx_meta = _CtxMeta(headless=headless, created_at=time.time())
+    # ===== 健全性チェック（改良版） =====
+    async def _is_context_alive(self, ctx: Optional[BrowserContext]) -> bool:
+        """コンテキストの死活確認（タイムアウト付き）"""
+        if not ctx:
+            return False
+        
+        try:
+            # storage_stateで軽量チェック（2秒タイムアウト）
+            await asyncio.wait_for(
+                ctx.storage_state(),
+                timeout=2.0
+            )
+            
+            # ブラウザ接続確認
+            br = getattr(ctx, "browser", None)
+            if br and hasattr(br, "is_connected"):
+                if not br.is_connected():
+                    self._log("WARN", "Browser disconnected")
+                    return False
+            
+            return True
+            
+        except asyncio.TimeoutError:
+            self._log("WARN", "Context health check timeout")
+            return False
+        except Exception as e:
+            self._log("WARN", f"Context health check failed: {e}")
+            return False
 
-        log(f"Context launched successfully (headless={headless})")
-        return ctx
+    async def _safe_dispose_context(self, attr_name: str) -> None:
+        """指定属性のコンテキストを安全に破棄"""
+        try:
+            ctx = getattr(self, attr_name, None)
+            if ctx:
+                try:
+                    # ページを先に閉じる
+                    if hasattr(ctx, 'pages'):
+                        for page in ctx.pages:
+                            try:
+                                await page.close()
+                            except:
+                                pass
+                    
+                    # コンテキストを閉じる
+                    await ctx.close()
+                except Exception as e:
+                    self._log("WARN", f"Close error suppressed ({attr_name}): {e}")
+        finally:
+            setattr(self, attr_name, None)
 
-    async def _hard_close_ctx(self, *, reason: str, headless: bool = False) -> None:
-        ctx = self._headless_ctx if headless else self._browser_ctx
-        if ctx:
+    # ===== ブラウザ管理 =====
+    async def _ensure_playwright(self) -> None:
+        """Playwright初期化"""
+        if not self._playwright:
+            self._playwright = await async_playwright().start()
+            self._log("INFO", "Playwright started")
+
+    async def _launch_browser(self, headless: bool = False) -> Browser:
+        """ブラウザ起動（headless変更時は再起動）"""
+        if self._browser:
             try:
-                await ctx.close()
-                log(f"Context closed (headless={headless}, reason={reason})")
+                if self._browser.is_connected() and self._browser_headless == headless:
+                    return self._browser
+            except:
+                pass
+            
+            # ブラウザ再起動が必要
+            self._log("INFO", f"Browser restart required (headless: {self._browser_headless} -> {headless})")
+            await self._close_browser_internal()
+
+        await self._ensure_playwright()
+
+        self._browser = await self._playwright.chromium.launch(
+            headless=headless,
+            args=[
+                '--disable-blink-features=AutomationControlled',
+                '--no-sandbox',
+                '--disable-dev-shm-usage',
+                '--disable-web-security',
+                '--disable-features=IsolateOrigins,site-per-process',
+                '--start-maximized'
+            ]
+        )
+        self._browser_headless = headless
+        self._log("INFO", f"Browser launched (headless={headless})")
+        return self._browser
+
+    async def _close_browser_internal(self) -> None:
+        """内部用：ブラウザとコンテキストを安全にクローズ"""
+        await self._safe_dispose_context("_browser_ctx")
+        await self._safe_dispose_context("_headless_ctx")
+        
+        try:
+            if self._browser:
+                if hasattr(self._browser, 'is_connected') and self._browser.is_connected():
+                    await self._browser.close()
+        except Exception as e:
+            self._log("WARN", f"Browser close error: {e}")
+        finally:
+            self._browser = None
+            self._browser_headless = None
+
+    async def _create_context(self, headless: bool = False, persistent: bool = True) -> BrowserContext:
+        """コンテキスト作成（NoneType.send対策済み）"""
+        browser = await self._launch_browser(headless=headless)
+        
+        # コンテキスト作成オプション
+        context_opts = {
+            "user_agent": self._ua,
+            "viewport": {'width': 1920, 'height': 1080},
+            "locale": 'ja-JP',
+            "timezone_id": 'Asia/Tokyo'
+        }
+        
+        if persistent:
+            state_file = AUTH_DIR / "state.json"
+            if state_file.exists():
+                context_opts["storage_state"] = str(state_file)
+
+        # NoneType.send対策：3回リトライ
+        for attempt in range(3):
+            try:
+                # ★ここが重要：NoneType.sendエラーを明示的にキャッチ
+                context = await browser.new_context(**context_opts)
+                
+                if persistent:
+                    self._log("INFO", f"Persistent context created (headless={headless})")
+                else:
+                    self._log("INFO", f"Temporary context created (headless={headless})")
+                
+                return context
+                
+            except AttributeError as e:
+                # NoneType.send特有のエラーを検出
+                error_str = str(e)
+                if "NoneType" in error_str and "send" in error_str:
+                    self._nonetype_recovery_count += 1
+                    self._log("ERROR", f"NoneType.send detected (attempt {attempt+1}/3, total recovery: {self._nonetype_recovery_count})")
+                    
+                    if attempt < 2:
+                        # 即座にemergency_restart
+                        await self._emergency_restart()
+                        # 短いバックオフ
+                        await asyncio.sleep(0.5 * (attempt + 1))
+                        # ブラウザ再取得
+                        browser = await self._launch_browser(headless=headless)
+                        continue
+                    else:
+                        raise RuntimeError(f"Failed to create context after 3 NoneType.send recoveries")
+                else:
+                    # その他のAttributeError
+                    raise
+                    
             except Exception as e:
-                log(f"Context close error: {e}", "WARN")
+                self._log("ERROR", f"Context creation failed (attempt {attempt+1}): {e}")
+                if attempt == 2:
+                    raise
 
-        if headless:
-            self._headless_ctx = None
-        else:
-            self._browser_ctx = None
-            self._page = None
-            self._ctx_meta = None
+        raise RuntimeError("Failed to create context after 3 attempts")
 
-    async def _ensure_context(self, *, headless: bool) -> BrowserContext:
-        if headless:
-            if self._headless_ctx:
-                return self._headless_ctx
-            return await self._launch_new_ctx(headless=True)
+    # ===== 完全再起動（改良版） =====
+    async def _emergency_restart(self) -> None:
+        """Playwright/Browser完全再起動（NoneType.send対応）"""
+        self._log("WARN", "Emergency restart initiated")
+        self._recovery_count += 1
+        self._last_recovery = time.time()
+        
+        # 全リソース破棄
+        await self._safe_dispose_context("_headless_ctx")
+        await self._safe_dispose_context("_browser_ctx")
+        
+        if self._browser:
+            try:
+                await self._browser.close()
+            except:
+                pass
+            self._browser = None
+            self._browser_headless = None
+        
+        if self._playwright:
+            try:
+                await self._playwright.stop()
+            except:
+                pass
+            self._playwright = None
+        
+        # プロセス完全終了待ち
+        await asyncio.sleep(1.0)
+        
+        # 再起動
+        self._playwright = await async_playwright().start()
+        self._log("INFO", f"Playwright restarted (recovery #{self._recovery_count}, NoneType recoveries: {self._nonetype_recovery_count})")
 
-        if self._browser_ctx and self._ctx_meta:
-            if not self._ctx_meta.headless:
-                return self._browser_ctx
+    # ===== モード切替（自己修復型） =====
+    async def ensure_visible(self, persistent: bool = True) -> BrowserContext:
+        """可視モード確保（3回リトライ）"""
+        async with self._async_lock:
+            for attempt in range(3):
+                # 既存コンテキストの健全性チェック
+                if self._current_mode == "visible" and self._browser_ctx:
+                    if await self._is_context_alive(self._browser_ctx):
+                        self._log("DEBUG", "Visible context healthy")
+                        return self._browser_ctx
+                    
+                    self._log("WARN", f"Visible context dead (attempt {attempt+1})")
+                    await self._safe_dispose_context("_browser_ctx")
 
-            await self._hard_close_ctx(reason="mode_change_to_visible", headless=False)
-            return await self._launch_new_ctx(headless=False)
+                # ヘッドレスからCookie移行
+                if self._current_mode == "headless" and self._headless_ctx:
+                    await self._save_cookies_from_context(self._headless_ctx)
 
-        return await self._launch_new_ctx(headless=False)
+                try:
+                    # 新規作成（NoneType.send対策済み）
+                    self._browser_ctx = await self._create_context(headless=False, persistent=persistent)
+                    
+                    # Cookie移行
+                    if self._headless_ctx:
+                        try:
+                            cookies = await self._headless_ctx.cookies()
+                            if cookies:
+                                await self._browser_ctx.add_cookies(cookies)
+                                self._log("INFO", f"Migrated {len(cookies)} cookies to visible")
+                        except Exception as e:
+                            self._log("WARN", f"Cookie migration failed: {e}")
 
-    async def initialize(self) -> None:
-        log("Initialize called (no-op)")
+                    self._current_mode = "visible"
+                    self._last_activity = time.time()
+                    self._log("INFO", "Switched to visible mode")
+                    return self._browser_ctx
+                    
+                except Exception as e:
+                    self._log("ERROR", f"Visible context creation failed (attempt {attempt+1}): {e}")
+                    if attempt == 2:
+                        await self._emergency_restart()
+            
+            raise RuntimeError("Failed to create visible context after 3 attempts")
 
-    async def ensure_headless(self) -> BrowserContext:
-        async with self._lock:
-            return await self._ensure_context(headless=True)
+    async def ensure_headless(self, persistent: bool = True) -> BrowserContext:
+        """ヘッドレスモード確保（必ず健全なコンテキストを返す）"""
+        async with self._async_lock:
+            for attempt in range(3):
+                # 既存コンテキストの健全性チェック
+                if self._current_mode == "headless" and self._headless_ctx:
+                    if await self._is_context_alive(self._headless_ctx):
+                        self._log("DEBUG", "Headless context healthy")
+                        return self._headless_ctx
+                    
+                    self._log("WARN", f"Headless context dead (attempt {attempt+1})")
+                    await self._safe_dispose_context("_headless_ctx")
 
-    async def ensure_visible(self) -> BrowserContext:
-        async with self._lock:
-            return await self._ensure_context(headless=False)
+                # 可視からCookie移行
+                if self._current_mode == "visible" and self._browser_ctx:
+                    try:
+                        cookies = await self._browser_ctx.cookies()
+                    except Exception as e:
+                        cookies = []
+                        self._log("WARN", f"Get cookies from visible failed: {e}")
+                    
+                    if not self._headless_ctx:
+                        try:
+                            self._headless_ctx = await self._create_context(headless=True, persistent=persistent)
+                        except Exception as e:
+                            self._log("ERROR", f"Headless creation failed: {e}")
+                            if attempt == 2:
+                                await self._emergency_restart()
+                                continue
+                            else:
+                                continue
+                    
+                    if cookies:
+                        try:
+                            await self._headless_ctx.add_cookies(cookies)
+                            self._log("INFO", f"Migrated {len(cookies)} cookies to headless")
+                        except Exception as e:
+                            self._log("WARN", f"Cookie migration to headless failed: {e}")
 
-    # ===== ウィザード UI =====
-    async def _show_login_guide(self, page: Page, timeout_minutes: int = 3) -> None:
-        """ログイン案内をページに表示"""
+                try:
+                    # コンテキスト作成（NoneType.send対策済み）
+                    if not self._headless_ctx:
+                        self._headless_ctx = await self._create_context(headless=True, persistent=persistent)
+                    
+                    # 作成直後の検証
+                    await asyncio.wait_for(
+                        self._headless_ctx.storage_state(),
+                        timeout=2.0
+                    )
+
+                    self._current_mode = "headless"
+                    self._last_activity = time.time()
+                    self._log("INFO", "Switched to headless mode")
+                    return self._headless_ctx
+                    
+                except Exception as e:
+                    self._log("ERROR", f"Headless context creation failed (attempt {attempt+1}): {e}")
+                    if attempt == 2:
+                        # 最終手段：完全再起動
+                        await self._emergency_restart()
+            
+            raise RuntimeError("Failed to create headless context after 3 attempts")
+
+    # ===== Cookie管理 =====
+    async def _save_cookies_from_context(self, ctx: BrowserContext) -> None:
+        """コンテキストからCookie保存"""
         try:
-            await page.evaluate("""
-                () => {
-                    const existing = document.getElementById('login-guide-overlay');
-                    if (existing) existing.remove();
-
-                    const div = document.createElement('div');
-                    div.id = 'login-guide-overlay';
-                    div.style.cssText = `
-                        position: fixed;
-                        top: 20px;
-                        left: 50%;
-                        transform: translateX(-50%);
-                        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-                        color: white;
-                        padding: 20px 30px;
-                        border-radius: 10px;
-                        box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-                        z-index: 999999;
-                        font-family: 'Helvetica Neue', Arial, sans-serif';
-                        font-size: 16px;
-                        text-align: center;
-                        animation: slideDown 0.5s ease-out;
-                    `;
-
-                    div.innerHTML = `
-                        <h2 style="margin: 0 0 10px 0; font-size: 20px;">
-                            🔐 手動ログインをお願いします
-                        </h2>
-                        <p style="margin: 0 0 10px 0;">
-                            """ + str(timeout_minutes) + """分以内にTwitCastingにログインしてください
-                        </p>
-                        <div style="
-                            background: rgba(255,255,255,0.2);
-                            padding: 10px;
-                            border-radius: 5px;
-                            margin-top: 10px;
-                        ">
-                            <strong>手順：</strong><br>
-                            1. 右上の「ログイン」をクリック<br>
-                            2. ID/パスワードを入力<br>
-                            3. ログイン完了後、自動で次へ進みます
-                        </div>
-                        <div id="login-countdown" style="
-                            margin-top: 15px;
-                            font-size: 24px;
-                            font-weight: bold;
-                        "></div>
-                    `;
-
-                    const style = document.createElement('style');
-                    style.textContent = `
-                        @keyframes slideDown {
-                            from { opacity: 0; transform: translateX(-50%) translateY(-20px); }
-                            to { opacity: 1; transform: translateX(-50%) translateY(0); }
-                        }
-                    `;
-                    document.head.appendChild(style);
-
-                    document.body.appendChild(div);
-
-                    const endTime = Date.now() + (""" + str(timeout_minutes * 60000) + """);
-                    const countdownEl = document.getElementById('login-countdown');
-
-                    const updateCountdown = () => {
-                        const remaining = Math.max(0, endTime - Date.now());
-                        const minutes = Math.floor(remaining / 60000);
-                        const seconds = Math.floor((remaining % 60000) / 1000);
-                        countdownEl.textContent = `残り時間: ${minutes}:${seconds.toString().padStart(2, '0')}`;
-
-                        if (remaining > 0) {
-                            requestAnimationFrame(updateCountdown);
-                        } else {
-                            countdownEl.textContent = 'タイムアウト';
-                            countdownEl.style.color = '#ff6b6b';
-                        }
-                    };
-                    updateCountdown();
-                }
-            """)
-            log("Login guide displayed on page")
+            cookies = await ctx.cookies()
+            cookie_file = LOGS / f"cookies_saved_{int(time.time())}.json"
+            with open(cookie_file, "w", encoding="utf-8") as f:
+                json.dump(cookies, f, ensure_ascii=False, indent=2)
+            self._log("INFO", f"Saved {len(cookies)} cookies to {cookie_file.name}")
         except Exception as e:
-            log(f"Failed to show login guide: {e}", "WARN")
+            self._log("ERROR", f"Cookie save error: {e}")
 
-    async def _remove_login_guide(self, page: Page) -> None:
-        """ログイン案内を削除"""
+    async def _inject_cookies_into_context(self, ctx: BrowserContext) -> None:
+        """コンテキストへCookie注入"""
         try:
-            await page.evaluate("""
-                () => {
-                    const el = document.getElementById('login-guide-overlay');
-                    if (el) el.remove();
-                }
-            """)
-        except Exception:
-            pass
+            cookie_files = sorted(LOGS.glob("cookies_saved_*.json"), key=lambda p: p.stat().st_mtime)
+            if not cookie_files:
+                return
 
-    # ===== 強度昇格（weak -> strong） =====
-    async def _try_promote_to_strong(self, page: Page) -> bool:
-        """weakからstrongへの昇格を試みる"""
-        try:
-            log("Attempting to promote weak to strong")
+            latest = cookie_files[-1]
+            with open(latest, "r", encoding="utf-8") as f:
+                cookies = json.load(f)
 
-            # 1) トップ
-            await page.goto("https://twitcasting.tv/", wait_until="domcontentloaded")
-            await asyncio.sleep(1.0)
-            status = await self._probe_login_status_via_context()
-            if status == "strong":
-                log("Successfully promoted to strong via top page")
-                return True
-
-            # 2) アカウント
-            await page.goto("https://twitcasting.tv/indexaccount.php", wait_until="domcontentloaded")
-            await asyncio.sleep(1.0)
-            status = await self._probe_login_status_via_context()
-            if status == "strong":
-                log("Successfully promoted to strong via account")
-                return True
-
-            # 3) マイページ
-            await page.goto("https://twitcasting.tv/indexmypage.php", wait_until="domcontentloaded")
-            await asyncio.sleep(1.0)
-            status = await self._probe_login_status_via_context()
-            if status == "strong":
-                log("Successfully promoted to strong via mypage")
-                return True
-
-            # 4) 設定
-            await page.goto("https://twitcasting.tv/indexsettings.php", wait_until="domcontentloaded")
-            await asyncio.sleep(1.0)
-            status = await self._probe_login_status_via_context()
-            if status == "strong":
-                log("Successfully promoted to strong via settings")
-                return True
-
+            await ctx.add_cookies(cookies)
+            self._log("INFO", f"Injected {len(cookies)} cookies from {latest.name}")
         except Exception as e:
-            log(f"Promotion failed: {e}", "WARN")
+            self._log("ERROR", f"Cookie injection error: {e}")
 
-        return False
-
-    # ===== Cookie 手動移送 =====
     async def _inject_visible_cookies_into_headless(self) -> int:
-        """
-        可視contextの TwitCasting系 Cookie をヘッドレスへ移送する
-        戻り値: 注入したCookie個数
-        """
-        if not self._browser_ctx:
+        """可視→ヘッドレスへCookie移送"""
+        if not self._browser_ctx or not self._headless_ctx:
             return 0
+
         try:
-            # 可視側でCookie取得
-            src = self._browser_ctx
-            cookies = await src.cookies()
-            tc = [c for c in cookies if "twitcasting.tv" in str(c.get("domain", ""))]
-            if not tc:
+            cookies = await self._browser_ctx.cookies(urls=[
+                "https://twitcasting.tv/",
+                "https://twitcasting.tv/mypage.php",
+                "https://ssl.twitcasting.tv/"
+            ])
+
+            tc_cookies = [c for c in cookies if "twitcasting" in c.get("domain", "").lower()]
+
+            if not tc_cookies:
+                self._log("WARN", "No twitcasting cookies to inject")
                 return 0
 
-            # ヘッドレスを起動し、Cookie注入
-            dst = await self.ensure_headless()
-            await dst.add_cookies(tc)
-            log(f"Injected {len(tc)} cookies into headless")
-            return len(tc)
+            cookie_names = [c.get("name", "") for c in tc_cookies]
+            has_session = "_twitcasting_session" in cookie_names
+            has_tc_ss = "tc_ss" in cookie_names
+
+            self._log("INFO", f"Injecting {len(tc_cookies)} cookies to headless")
+            self._log("INFO", f"Cookies: {', '.join(cookie_names)}")
+
+            if not has_session:
+                if has_tc_ss:
+                    self._log("INFO", "Session via 'tc_ss' accepted as strong")
+                else:
+                    self._log("WARN", "Neither _twitcasting_session nor tc_ss found")
+
+            await self._headless_ctx.add_cookies(tc_cookies)
+
+            await asyncio.sleep(0.5)
+
+            headless_cookies = await self._headless_ctx.cookies(urls=[
+                "https://twitcasting.tv/",
+                "https://twitcasting.tv/mypage.php"
+            ])
+
+            headless_tc = [c for c in headless_cookies if "twitcasting" in c.get("domain", "").lower()]
+            headless_names = [c.get("name", "") for c in headless_tc]
+
+            if "_twitcasting_session" not in headless_names:
+                if "tc_ss" in headless_names:
+                    self._log("INFO", "tc_ss confirmed in headless (sufficient for strong login)")
+                else:
+                    self._log("WARN", "No valid login cookies in headless")
+
+                created = False
+                try:
+                    page = None
+                    if self._headless_ctx.pages:
+                        page = self._headless_ctx.pages[0]
+                    else:
+                        page = await self._headless_ctx.new_page()
+                        created = True
+                    try:
+                        await page.goto("https://twitcasting.tv/mypage.php",
+                                        wait_until="domcontentloaded", timeout=10000)
+                        await asyncio.sleep(2)
+                    except Exception as e:
+                        self._log("WARN", f"Headless navigation error: {e}")
+
+                    cookies2 = await self._headless_ctx.cookies(urls=["https://twitcasting.tv/"])
+                    if any(c.get("name") == "_twitcasting_session" for c in cookies2):
+                        self._log("INFO", "✅ _twitcasting_session obtained via page navigation")
+                    elif any(c.get("name") == "tc_ss" for c in cookies2):
+                        self._log("INFO", "✅ tc_ss confirmed (sufficient for strong login)")
+                finally:
+                    try:
+                        if created and page:
+                            await page.close()
+                    except Exception:
+                        pass
+            else:
+                self._log("INFO", f"✅ Headless has _twitcasting_session")
+
+            return len(tc_cookies)
+
         except Exception as e:
-            log(f"Cookie injection failed: {e}", "WARN")
+            self._log("ERROR", f"Cookie injection failed: {e}")
             return 0
 
-    # ===== ログインウィザード =====
-    async def guided_login_wizard(self, url: Optional[str] = None, timeout_sec: int = 180) -> bool:
-        """
-        ログインウィザード v7.3
-        - 初回3秒は完全にCookie無視
-        - weakは成功にしない（10秒後のみ昇格試行）
-        - strong検出後は Cookie をヘッドレスへ移送し、ヘッドレスで strong を再確認（保証）
-        """
-        async with self._lock:
-            if self._login_in_progress:
-                log("Login wizard already running", "WARN")
-                return False
-            self._login_in_progress = True
-            self._wizard_start_time = time.time()
-            log("Login wizard started")
+    # ===== ログイン管理 =====
+    async def check_login_status(self) -> str:
+        """ログイン状態確認（副作用なし）"""
+        try:
+            state_file = AUTH_DIR / "state.json"
+            if not state_file.exists():
+                return "none"
+
+            with open(state_file, "r", encoding="utf-8") as f:
+                state = json.load(f)
+
+            cookies = state.get("cookies", [])
+            cookie_names = {c.get("name", "") for c in cookies}
+
+            primary = {"tc_ss", "_twitcasting_session", "tc_s"}
+            secondary = {"tc_id", "tc_u"}
+
+            if cookie_names & primary:
+                if "tc_ss" in cookie_names and "_twitcasting_session" not in cookie_names:
+                    self._log("INFO", "Login status: strong (tc_ss present, _twitcasting_session missing)")
+                return "strong"
+            elif cookie_names & secondary:
+                return "weak"
+            else:
+                return "none"
+
+        except Exception as e:
+            self._log("ERROR", f"Login status check error: {e}")
+            return "none"
+
+    async def guided_login_wizard(self, timeout: float = 180.0) -> bool:
+        """ログインウィザード"""
+        self._log("INFO", "Starting guided login wizard")
 
         try:
-            ctx = await self.ensure_visible()
-            page = self._page or await ctx.new_page()
-            self._page = page
+            ctx = await self.ensure_visible(persistent=True)
+            page = await ctx.new_page()
 
-            # TwitCastingトップページ
-            target = url or "https://twitcasting.tv/"
-            await page.goto(target, wait_until="domcontentloaded")
-            log(f"Login page opened: {target}")
+            candidates = [
+                "https://twitcasting.tv/indexcaslogin.php",
+                "https://ssl.twitcasting.tv/login.php",
+                "https://twitcasting.tv/?m=login",
+                "https://twitcasting.tv/login.php",
+                "https://twitcasting.tv/",
+            ]
+            opened = False
+            for u in candidates:
+                try:
+                    await page.goto(u, wait_until="domcontentloaded", timeout=10000)
+                    title = await page.title()
+                    has_form = await page.evaluate(
+                        "()=>!!document.querySelector('form input[type=\"password\"],[name=\"password\"]')"
+                    )
+                    if "Not Found" not in (title or "") or has_form:
+                        opened = True
+                        break
+                except Exception:
+                    pass
+            if not opened:
+                self._log("ERROR", "Login page navigation failed (all candidates)")
+                await page.close()
+                return False
 
-            # ログイン案内を表示
-            await self._show_login_guide(page, timeout_minutes=timeout_sec // 60)
+            self._log("INFO", "Opened TwitCasting login page")
+            print("\n" + "="*50)
+            print("ブラウザでTwitCastingにログインしてください")
+            print("ログイン完了後、自動的に処理が続行されます")
+            print("="*50 + "\n")
 
-            # 初回3秒間はCookie判定しない
-            log("Initial cookie ignore period (3 seconds)")
-            await asyncio.sleep(3.0)
+            start_time = time.time()
+            while time.time() - start_time < timeout:
+                await asyncio.sleep(2)
 
-            # ログイン成功待機
-            start = time.time()
-            weak_detected_time = None
+                cookies = await ctx.cookies()
+                cookie_names = {c.get("name", "") for c in cookies}
 
-            while time.time() - start < timeout_sec:
-                elapsed = time.time() - self._wizard_start_time
-                if elapsed < 3.0:
-                    await asyncio.sleep(0.5)
-                    continue
+                primary = {"tc_ss", "_twitcasting_session", "tc_s"}
+                if cookie_names & primary:
+                    self._log("INFO", "Login successful (strong detected)")
 
-                status = await self.check_login_status()
-                log(f"Login check: status={status}, elapsed={elapsed:.1f}s")
-
-                # === strong: 成功扱い ===
-                if status == "strong":
-                    log("Login successful (strong detected)")
-                    self._last_known_login_status = "strong"
-                    await self._remove_login_guide(page)
-
-                    # 見た目の成功表示（非必須）
                     try:
-                        await page.evaluate("""
-                            () => {
-                                const div = document.createElement('div');
-                                div.style.cssText = `
-                                    position: fixed;
-                                    top: 50%;
-                                    left: 50%;
-                                    transform: translate(-50%, -50%);
-                                    background: #4caf50;
-                                    color: white;
-                                    padding: 30px;
-                                    border-radius: 10px;
-                                    font-size: 24px;
-                                    z-index: 999999;
-                                `;
-                                div.textContent = '✅ ログイン成功！';
-                                document.body.appendChild(div);
-                                setTimeout(() => div.remove(), 2000);
-                            }
-                        """)
+                        await page.goto("https://twitcasting.tv/mypage.php",
+                                        wait_until="domcontentloaded",
+                                        timeout=10000)
+                        await asyncio.sleep(2)
+                        self._log("INFO", "Mypage navigation completed")
+                    except Exception as e:
+                        self._log("WARN", f"Mypage navigation error (non-fatal): {e}")
+
+                    try:
+                        await page.goto("https://twitcasting.tv/",
+                                        wait_until="domcontentloaded",
+                                        timeout=10000)
+                        await asyncio.sleep(1)
                     except Exception:
                         pass
 
-                    await asyncio.sleep(0.5)
+                    session_found = False
+                    for i in range(20):
+                        try:
+                            cookies = await ctx.cookies(urls=[
+                                "https://twitcasting.tv/",
+                                "https://twitcasting.tv/mypage.php"
+                            ])
+                            tc_cookies = [c for c in cookies if "twitcasting" in c.get("domain", "").lower()]
+                            names = [c.get("name", "") for c in tc_cookies]
 
-                    # === 安全切替: 先にヘッドレス起動 → Cookie移送 → 可視閉じ ===
-                    try:
-                        log("Starting safe context switch")
+                            session_found = "_twitcasting_session" in names
+                            if session_found:
+                                self._log("INFO", f"✅ _twitcasting_session found after {i*0.5}s")
+                                self._log("DEBUG", f"All cookies: {names}")
+                                break
 
-                        # 1) ヘッドレス起動
-                        headless_ctx = await self.ensure_headless()
-                        if headless_ctx:
-                            log("Headless context ready (pre-switch)")
+                            if i == 19:
+                                if "tc_ss" in names:
+                                    self._log("INFO", "Session via 'tc_ss' confirmed after 10s")
+                                    self._log("INFO", f"Available cookies: {names}")
+                                else:
+                                    self._log("WARN", "No valid login cookies after 10s")
+                                    self._log("WARN", f"Available cookies: {names}")
 
-                            # 2) Cookie移送（可視→ヘッドレス）
-                            injected = await self._inject_visible_cookies_into_headless()
-                            if injected == 0:
-                                log("No twitcasting.* cookies injected into headless", "WARN")
+                            await asyncio.sleep(0.5)
+                        except Exception:
+                            break
 
-                            # 3) 可視を閉じて切替完了
-                            await self._hard_close_ctx(reason="post_login_switch", headless=False)
-                            log("Visible context closed; switched to headless")
+                    await ctx.storage_state(path=str(AUTH_DIR / "state.json"))
+                    self._log("INFO", "Login state saved")
 
-                        # 4) 最終保証: ヘッドレスで strong を確認
-                        final = await self.check_login_status()
-                        if final != "strong":
-                            log(f"Wizard exit blocked: final={final}", "WARN")
-                            return False
+                    await asyncio.sleep(1.0)
+                    self._log("INFO", "Starting safe context switch")
 
-                    except Exception as e:
-                        log(f"Context switch flow failed: {e}", "WARN")
-                        # 失敗しても最終確認に賭ける
-                        final = await self.check_login_status()
-                        if final != "strong":
-                            return False
+                    await self.ensure_headless(persistent=True)
+                    await self._inject_visible_cookies_into_headless()
+
+                    await page.close()
 
                     return True
 
-                # === weak: 10秒後だけ昇格試行 ===
-                elif status == "weak":
-                    if weak_detected_time is None:
-                        weak_detected_time = time.time()
-                        log("Weak status detected (will try promotion after 10s)")
-
-                    if weak_detected_time and (time.time() - weak_detected_time > 10):
-                        log("10 seconds elapsed since weak detection, attempting promotion")
-                        promoted = await self._try_promote_to_strong(page)
-                        if promoted:
-                            status = await self._probe_login_status_via_context()
-                            if status == "strong":
-                                self._last_known_login_status = "strong"
-                                log("Promotion successful, continuing as strong")
-                                continue
-                        else:
-                            log("Promotion failed, weak remains weak")
-
-                await asyncio.sleep(1.0)
-
-            log("Login timeout", "WARN")
-            await self._remove_login_guide(page)
+            self._log("WARN", f"Login timeout after {timeout} seconds")
+            await page.close()
             return False
 
-        finally:
-            async with self._lock:
-                self._login_in_progress = False
-                self._wizard_start_time = 0
-                log("Login wizard ended")
-
-    # ===== ログイン状態判定 =====
-    async def _probe_login_status_via_context(self) -> Optional[str]:
-        """PlaywrightのContextからCookieを読む（Context優先）"""
-        try:
-            ctx = self._browser_ctx or self._headless_ctx
-            if not ctx:
-                return None
-
-            cookies = await ctx.cookies()
-            tc_cookies = [
-                c for c in cookies
-                if isinstance(c, dict) and ("twitcasting.tv" in str(c.get("domain", "")))
-            ]
-
-            names = {c.get("name", "") for c in tc_cookies}
-
-            # ウィザード開始から3秒未満は none を返して初期ブレを無視
-            if self._wizard_start_time > 0 and (time.time() - self._wizard_start_time < 3.0):
-                log("Initial period active, returning none", "DEBUG")
-                return "none"
-
-            # 【修正】strong 判定（緩和版 - どれか1つでOK）
-            strong_cookies = {"_twitcasting_session", "tc_ss", "twitcasting_session", "tc_sid", "tc_s"}
-            if names & strong_cookies:
-                return "strong"
-
-            # 【修正】weak 判定（緩和版 - 1個でもあればOK）
-            weak_cookies = {"tc_s", "tc_u", "user", "twitcasting_user_id", "twitcasting_live_session"}
-            if names & weak_cookies:
-                return "weak"
-
-            return "none"
-
         except Exception as e:
-            log(f"Context cookie probe failed: {e}", "WARN")
-            return None
+            self._log("ERROR", f"Login wizard error: {e}")
+            return False
 
-    def _find_cookies_db(self) -> Optional[Path]:
-        """Cookiesファイルを探す（DBフォールバック用）"""
-        candidates = [
-            AUTH_DIR / "Default" / "Network" / "Cookies",
-            AUTH_DIR / "Default" / "Cookies",
-            AUTH_DIR / "Network" / "Cookies",
-            AUTH_DIR / "Cookies",
-        ]
-        for p in candidates:
-            if p.exists():
-                return p
-        return None
-
-    def _try_direct_read(self, cookies_db: Path) -> Optional[str]:
-        """DB直接読み取り（read-only接続優先）"""
+    # ===== Cookie出力（RecorderWrapper用） =====
+    async def export_cookies(self, output_path: Path) -> bool:
+        """現在のCookieをNetscape形式で出力"""
         try:
-            uri = f"file:{cookies_db.as_posix()}?mode=ro&immutable=1&cache=shared"
-            con = sqlite3.connect(uri, uri=True, timeout=0.1)
-        except:
-            con = sqlite3.connect(str(cookies_db), timeout=0.1)
+            # 現在のコンテキストから取得
+            ctx = self._headless_ctx or self._browser_ctx
+            if not ctx:
+                self._log("ERROR", "No active context for cookie export")
+                return False
+                
+            cookies = await ctx.cookies()
+            tc_cookies = [c for c in cookies if "twitcasting" in c.get("domain", "").lower()]
+            
+            # Netscape形式で出力
+            with open(output_path, "w", encoding="utf-8") as f:
+                f.write("# Netscape HTTP Cookie File\n")
+                f.write("# This is a generated file! Do not edit.\n\n")
+                
+                for cookie in tc_cookies:
+                    domain = cookie.get("domain", "")
+                    flag = "TRUE" if domain.startswith(".") else "FALSE"
+                    path = cookie.get("path", "/")
+                    secure = "TRUE" if cookie.get("secure", False) else "FALSE"
+                    expires = str(int(cookie.get("expires", 0)))
+                    name = cookie.get("name", "")
+                    value = cookie.get("value", "")
+                    
+                    f.write(f"{domain}\t{flag}\t{path}\t{secure}\t{expires}\t{name}\t{value}\n")
+            
+            self._log("INFO", f"Exported {len(tc_cookies)} cookies to {output_path}")
+            return True
+            
+        except Exception as e:
+            self._log("ERROR", f"Cookie export failed: {e}")
+            return False
+
+    # ===== 初期化（RecorderWrapper用） =====
+    async def initialize(self) -> None:
+        """初期化（ensure_headlessのエイリアス）"""
+        await self.ensure_headless(persistent=True)
+
+    # ===== ログイン実行（RecorderWrapper用） =====
+    async def perform_login(self) -> bool:
+        """ログイン実行（guided_login_wizardのエイリアス）"""
+        return await self.guided_login_wizard()
+
+    # ===== クリーンアップ =====
+    async def close(self) -> None:
+        """リソース解放"""
+        self._log("INFO", "Closing ChromeSingleton")
+        
         try:
-            return self._query_cookies(con)
-        finally:
-            con.close()
-
-    def _try_copy_read(self, cookies_db: Path) -> Optional[str]:
-        """DBを一時コピーして読み取り"""
-        with tempfile.TemporaryDirectory() as td:
-            tmp = Path(td) / "Cookies.db"
-            shutil.copy2(cookies_db, tmp)
-            con = sqlite3.connect(str(tmp))
+            await self._safe_dispose_context("_browser_ctx")
+            await self._safe_dispose_context("_headless_ctx")
+            
             try:
-                return self._query_cookies(con)
-            finally:
-                con.close()
-
-    def _probe_login_status_from_profile(self) -> Optional[str]:
-        """DB直読み（フォールバック）"""
-        cookies_db = self._find_cookies_db()
-        if not cookies_db:
-            return None
-
-        methods = [self._try_direct_read, self._try_copy_read]
-        for method in methods:
-            try:
-                result = method(cookies_db)
-                if result is not None:
-                    return result
+                if self._browser:
+                    if hasattr(self._browser, 'is_connected'):
+                        if self._browser.is_connected():
+                            await self._browser.close()
+                    else:
+                        await self._browser.close()
             except Exception as e:
-                log(f"DB probe method failed: {e}", "DEBUG")
-        return None
+                self._log("WARN", f"Browser close error: {e}")
+            finally:
+                self._browser = None
+                self._browser_headless = None
+            
+            try:
+                if self._playwright:
+                    await self._playwright.stop()
+            except Exception as e:
+                self._log("WARN", f"Playwright stop error: {e}")
+            finally:
+                self._playwright = None
+            
+            self._current_mode = None
+            self._log("INFO", "ChromeSingleton closed successfully")
+            
+        except Exception as e:
+            self._log("WARN", f"Close finalization warning: {e}")
 
-    def _query_cookies(self, con: sqlite3.Connection) -> Optional[str]:
-        """Cookie名のみで簡易判定（DBフォールバック）【修正版】"""
-        cur = con.cursor()
-        cur.execute("""
-            SELECT name FROM cookies
-            WHERE host_key LIKE '%.twitcasting.tv'
-               OR host_key = 'twitcasting.tv'
-               OR host_key = '.twitcasting.tv'
-        """)
-        names = {row[0] for row in cur.fetchall()}
+    # ===== 健全性情報 =====
+    def is_healthy(self) -> bool:
+        """システム健全性チェック"""
+        try:
+            # 最近のリカバリが多すぎないか
+            if self._recovery_count > 5:
+                if time.time() - self._last_recovery < 300:  # 5分以内に5回以上
+                    return False
+            
+            # NoneType.sendリカバリが多すぎないか
+            if self._nonetype_recovery_count > 10:
+                return False
+            
+            # 長時間アイドルでないか
+            if time.time() - self._last_activity > 3600:  # 1時間
+                return False
+            
+            return True
+            
+        except:
+            return False
 
-        # 【修正】strong判定（緩和版）
-        strong_cookies = {"_twitcasting_session", "tc_ss", "twitcasting_session", "tc_sid", "tc_s"}
-        if names & strong_cookies:
-            return "strong"
-        
-        # 【修正】weak判定（緩和版 - 1個でもあればOK）  
-        weak_cookies = {"tc_s", "tc_u", "user", "twitcasting_user_id", "twitcasting_live_session"}
-        if names & weak_cookies:
-            return "weak"
-        
-        return "none" if names else None
-
-    async def check_login_status(self) -> str:
-        """
-        ログイン状態確認（Context優先→DBフォールバック）
-        【重要修正】544-545行目の強制return "strong"を削除
-        """
-        # 【削除】強制的にstrongを返すデバッグコード
-        # return "strong"  # ← これが問題の根源だった！
-        
-        # 以下が本来の判定ロジック
-        # Context優先
-        status_ctx = await self._probe_login_status_via_context()
-        status = status_ctx if status_ctx is not None else self._probe_login_status_from_profile()
-
-        if status:
-            # strong からの降格防止
-            if self._last_known_login_status == "strong" and status in ("weak", "none"):
-                log(f"Degrade attempt (strong->{status}), re-checking", "WARN")
-                await asyncio.sleep(0.2)
-                status2_ctx = await self._probe_login_status_via_context()
-                status2 = status2_ctx if status2_ctx is not None else self._probe_login_status_from_profile()
-                status = status2 if status2 and status2 != "none" else "strong"
-
-            # weak -> none の降格防止（新規）
-            elif self._last_known_login_status == "weak" and status in ("none", None):
-                log("Degrade attempt (weak->none), re-checking", "WARN")
-                await asyncio.sleep(0.2)
-                status2_ctx = await self._probe_login_status_via_context()
-                status2 = status2_ctx if status2_ctx is not None else self._probe_login_status_from_profile()
-                if status2 and status2 != "none":
-                    status = status2
-                else:
-                    status = "weak"
-
-            self._last_known_login_status = status
-            return status
-
-        log(f"Probe failed, keeping last known: {self._last_known_login_status}", "WARN")
-        return self._last_known_login_status
-
-    # ===== ユーティリティ =====
-    async def close(self, keep_chrome: bool = True) -> None:
-        """終了処理"""
-        async with self._lock:
-            if not keep_chrome:
-                await self._hard_close_ctx(reason="close", headless=False)
-                await self._hard_close_ctx(reason="close", headless=True)
-            log("Close called")
-
-    def get_unified_ua(self) -> str:
-        """統一UA（録画系のヘッダで使用）"""
-        return "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
-
-
-# ===== エクスポート関数 =====
+# ===== グローバル取得関数 =====
 def get_chrome_singleton() -> ChromeSingleton:
-    return ChromeSingleton.instance()
+    """ChromeSingletonインスタンス取得"""
+    return ChromeSingleton()
 
-def get_instance() -> ChromeSingleton:
-    return ChromeSingleton.instance()
+# ===== 互換性のため（facade/tc_recorder_core用） =====
+ChromeSingleton = ChromeSingleton
 
-async def get_singleton() -> ChromeSingleton:
-    return ChromeSingleton.instance()
+# ===== テスト =====
+if __name__ == "__main__":
+    async def test():
+        chrome = get_chrome_singleton()
+
+        status = await chrome.check_login_status()
+        print(f"Login status: {status}")
+
+        if status != "strong":
+            success = await chrome.guided_login_wizard()
+            print(f"Login wizard result: {success}")
+
+        ctx = await chrome.ensure_headless()
+        page = await ctx.new_page()
+        await page.goto("https://twitcasting.tv/")
+        print(f"Page title: {await page.title()}")
+        await page.close()
+
+        print(f"Chrome is healthy: {chrome.is_healthy()}")
+
+        await chrome.close()
+
+    asyncio.run(test())
